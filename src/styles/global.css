@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --paper: #EDE6D4;
+  --paper-linha: #CFC4A6;
+  --ink: #20303F;
+  --ink-soft: #5C6B78;
+  --verde: #2E7D5E;
+  --rust: #A8462B;
+  --ouro: #B8862B;
+  --margem: #B5473A;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.app-shell {
+  background: var(--paper);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 34px,
+    var(--paper-linha) 34px,
+    var(--paper-linha) 35px
+  );
+  min-height: 100vh;
+  position: relative;
+}
+
+.margem-vermelha {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: clamp(24px, 6vw, 56px);
+  width: 1.5px;
+  background: var(--margem);
+  opacity: 0.5;
+}
+
+.conteudo {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 36px clamp(18px, 5vw, 52px) 64px;
+  position: relative;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.cabecalho h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: clamp(26px, 3.6vw, 36px);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.cabecalho {
+  margin-bottom: 22px;
+}
+
+.erro {
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--rust);
+}
+
+.carregando {
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.cf-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.cf-btn {
+  transition: transform 0.12s ease;
+}
+.cf-btn:hover {
+  transform: translateY(-1px);
+}
+.cf-btn:active {
+  transform: translateY(0);
+}
+
+.cf-focus:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.cf-linha-remover {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.cf-linha:hover .cf-linha-remover {
+  opacity: 1;
+}
+
+.cf-tab {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+input,
+select,
+button {
+  font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-btn,
+  .cf-linha-remover {
+    transition: none !important;
+  }
+}
