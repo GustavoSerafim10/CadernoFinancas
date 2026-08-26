@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Metas as MetasType, ResumoMes } from "../types";
 import { CATEGORIAS, MESES } from "../constants";
 import { formatarMoeda, parseMoeda } from "../utils/format";
@@ -27,7 +28,7 @@ export function Metas({ metas, setMetaCategoria, resumoMes, refDate }: Props) {
   });
 
   return (
-    <div>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
       <div style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 24 }}>
         metas mensais de {MESES[refDate.getMonth()].toLowerCase()} — defina um limite por categoria e acompanhe o quanto já usou.
       </div>
@@ -58,7 +59,12 @@ export function Metas({ metas, setMetaCategoria, resumoMes, refDate }: Props) {
               </div>
               {limite > 0 && (
                 <div style={{ height: 8, background: "var(--paper-linha)", borderRadius: 4, overflow: "hidden", marginBottom: 8 }}>
-                  <div style={{ width: `${progresso}%`, height: "100%", background: corBarra, borderRadius: 4 }} />
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progresso}%` }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    style={{ height: "100%", background: corBarra, borderRadius: 4 }}
+                  />
                 </div>
               )}
               <input
@@ -74,6 +80,6 @@ export function Metas({ metas, setMetaCategoria, resumoMes, refDate }: Props) {
           );
         })}
       </section>
-    </div>
+    </motion.div>
   );
 }

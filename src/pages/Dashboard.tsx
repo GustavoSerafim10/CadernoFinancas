@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -5,7 +6,12 @@ import { ResumoMes, PontoHistorico, Insight, ResumoApostas } from "../types";
 import { MESES, catLabel } from "../constants";
 import { formatarMoeda, formatarPct } from "../utils/format";
 import { SeletorMes } from "../components/SeletorMes";
+import { NumeroAnimado } from "../components/NumeroAnimado";
 import { rotuloCampo, cartaoEstilo, linkDiscreto } from "../components/estilosComuns";
+import {
+  CHART_GRID, CHART_AXIS_TEXT, CHART_AXIS_LINE, CHART_TOOLTIP_STYLE,
+  COR_GASTOS, COR_INVESTIDO, COR_RECEITA, COR_APOSTAS,
+} from "../components/chartTheme";
 
 interface Props {
   refDate: Date;
@@ -27,13 +33,13 @@ export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insig
   });
 
   return (
-    <div>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
       <div style={{ display: "flex", gap: 18, marginBottom: 6 }}>
         <button onClick={exportarCSV} className="cf-focus" style={linkDiscreto}>exportar este mês (CSV)</button>
         <button onClick={exportarTudoJSON} className="cf-focus" style={linkDiscreto}>exportar tudo (JSON)</button>
       </div>
 
-      <SeletorMes refDate={refDate} mudarMes={mudarMes} corDestaque="var(--ink)" />
+      <SeletorMes refDate={refDate} mudarMes={mudarMes} />
 
       {insights.length > 0 && (
         <section style={{ marginBottom: 28 }}>
@@ -57,37 +63,39 @@ export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insig
       )}
 
       <section style={{ ...cartaoEstilo, marginBottom: 32 }}>
-        <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 15, marginBottom: 16 }}>resumo do mês</div>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 15, marginBottom: 16 }}>resumo do mês</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 16 }}>
           <div>
             <div style={rotuloCampo}>receita</div>
-            <div className="cf-num" style={{ fontSize: 19, fontWeight: 600 }}>{formatarMoeda(resumoMes.receita)}</div>
+            <NumeroAnimado valor={resumoMes.receita} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600 }} />
           </div>
           <div>
             <div style={rotuloCampo}>gastos</div>
-            <div className="cf-num" style={{ fontSize: 19, fontWeight: 600, color: "var(--rust)" }}>{formatarMoeda(resumoMes.gastos)}</div>
+            <NumeroAnimado valor={resumoMes.gastos} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600, color: "var(--rust)" }} />
           </div>
           <div>
             <div style={rotuloCampo}>investido</div>
-            <div className="cf-num" style={{ fontSize: 19, fontWeight: 600, color: "var(--verde)" }}>{formatarMoeda(resumoMes.investido)}</div>
+            <NumeroAnimado valor={resumoMes.investido} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600, color: "var(--verde)" }} />
           </div>
           {resumoApostas.apostado > 0 && (
             <div>
               <div style={rotuloCampo}>apostas</div>
-              <div
+              <NumeroAnimado
+                valor={resumoApostas.lucro}
+                formatar={(v) => `${v >= 0 ? "+" : ""}${formatarMoeda(v)}`}
                 className="cf-num"
                 style={{ fontSize: 19, fontWeight: 600, color: resumoApostas.lucro >= 0 ? "var(--verde)" : "var(--rust)" }}
-              >
-                {resumoApostas.lucro >= 0 ? "+" : ""}
-                {formatarMoeda(resumoApostas.lucro)}
-              </div>
+              />
             </div>
           )}
           <div>
             <div style={rotuloCampo}>saldo livre</div>
-            <div className="cf-num" style={{ fontSize: 19, fontWeight: 700, color: resumoMes.saldo < 0 ? "var(--rust)" : "var(--ink)" }}>
-              {formatarMoeda(resumoMes.saldo)}
-            </div>
+            <NumeroAnimado
+              valor={resumoMes.saldo}
+              formatar={formatarMoeda}
+              className="cf-num"
+              style={{ fontSize: 19, fontWeight: 700, color: resumoMes.saldo < 0 ? "var(--rust)" : "var(--ink)" }}
+            />
           </div>
         </div>
       </section>
@@ -95,33 +103,30 @@ export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insig
       {historicoComLabel.length > 1 && (
         <section style={{ marginBottom: 36 }}>
           <div style={rotuloCampo}>evolução dos últimos meses</div>
-          <div style={{ display: "flex", gap: 16, marginBottom: 10, fontSize: 12, color: "var(--ink-soft)" }}>
+          <div style={{ display: "flex", gap: 16, marginBottom: 10, fontSize: 12, color: "var(--ink-soft)", flexWrap: "wrap" }}>
             <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 8, height: 8, borderRadius: 2, background: "var(--rust)", display: "inline-block" }} />gastos
+              <span style={{ width: 8, height: 8, borderRadius: 2, background: COR_GASTOS, display: "inline-block" }} />gastos
             </span>
             <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 8, height: 8, borderRadius: 2, background: "var(--verde)", display: "inline-block" }} />investido
+              <span style={{ width: 8, height: 8, borderRadius: 2, background: COR_INVESTIDO, display: "inline-block" }} />investido
             </span>
             <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 12, height: 1.5, background: "var(--ink)", display: "inline-block" }} />receita
+              <span style={{ width: 12, height: 1.5, background: COR_RECEITA, display: "inline-block" }} />receita
             </span>
             <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 12, height: 1.5, background: "#7A3E5E", display: "inline-block" }} />apostas
+              <span style={{ width: 12, height: 1.5, background: COR_APOSTAS, display: "inline-block" }} />apostas
             </span>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <ComposedChart data={historicoComLabel} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
-              <CartesianGrid stroke="var(--paper-linha)" vertical={false} />
-              <XAxis dataKey="label" tick={{ fill: "#5C6B78", fontSize: 12 }} axisLine={{ stroke: "#CFC4A6" }} tickLine={false} />
-              <YAxis tick={{ fill: "#5C6B78", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
-              <Tooltip
-                formatter={(v: number) => formatarMoeda(v)}
-                contentStyle={{ background: "#EDE6D4", border: "1px solid #20303F", borderRadius: 6, fontSize: 13, fontFamily: "'Inter', sans-serif" }}
-              />
-              <Bar dataKey="gastos" name="Gastos" fill="#A8462B" radius={[3, 3, 0, 0]} barSize={14} />
-              <Bar dataKey="investido" name="Investido" fill="#2E7D5E" radius={[3, 3, 0, 0]} barSize={14} />
-              <Line dataKey="receita" name="Receita" stroke="#20303F" strokeWidth={1.75} strokeDasharray="4 3" dot={{ r: 3, fill: "#20303F" }} />
-              <Line dataKey="lucroApostas" name="Apostas" stroke="#7A3E5E" strokeWidth={1.75} dot={{ r: 3, fill: "#7A3E5E" }} />
+              <CartesianGrid stroke={CHART_GRID} vertical={false} />
+              <XAxis dataKey="label" tick={{ fill: CHART_AXIS_TEXT, fontSize: 12 }} axisLine={{ stroke: CHART_AXIS_LINE }} tickLine={false} />
+              <YAxis tick={{ fill: CHART_AXIS_TEXT, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
+              <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} />
+              <Bar dataKey="gastos" name="Gastos" fill={COR_GASTOS} radius={[3, 3, 0, 0]} barSize={14} />
+              <Bar dataKey="investido" name="Investido" fill={COR_INVESTIDO} radius={[3, 3, 0, 0]} barSize={14} />
+              <Line dataKey="receita" name="Receita" stroke={COR_RECEITA} strokeWidth={1.75} strokeDasharray="4 3" dot={{ r: 3, fill: COR_RECEITA }} />
+              <Line dataKey="lucroApostas" name="Apostas" stroke={COR_APOSTAS} strokeWidth={1.75} dot={{ r: 3, fill: COR_APOSTAS }} />
             </ComposedChart>
           </ResponsiveContainer>
         </section>
@@ -131,18 +136,29 @@ export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insig
         <section>
           <div style={rotuloCampo}>gastos por categoria</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {[...resumoMes.porCategoria].sort((a, b) => b.total - a.total).map((c) => (
-              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            {[...resumoMes.porCategoria].sort((a, b) => b.total - a.total).map((c, i) => (
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.25, delay: i * 0.04 }}
+                style={{ display: "flex", alignItems: "center", gap: 12 }}
+              >
                 <span style={{ fontSize: 13, width: 100, flex: "0 0 auto", color: "var(--ink-soft)" }}>{c.label}</span>
-                <div style={{ flex: 1, height: 8, background: "var(--paper-linha)", borderRadius: 4, overflow: "hidden" }}>
-                  <div style={{ width: `${(c.total / maxCat) * 100}%`, height: "100%", background: c.cor, borderRadius: 4 }} />
+                <div style={{ flex: 1, height: 8, background: "var(--border)", borderRadius: 4, overflow: "hidden" }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(c.total / maxCat) * 100}%` }}
+                    transition={{ duration: 0.5, delay: i * 0.04, ease: "easeOut" }}
+                    style={{ height: "100%", background: c.cor, borderRadius: 4 }}
+                  />
                 </div>
                 <span className="cf-num" style={{ fontSize: 13, width: 84, textAlign: "right", flex: "0 0 auto" }}>{formatarMoeda(c.total)}</span>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
       )}
-    </div>
+    </motion.div>
   );
 }

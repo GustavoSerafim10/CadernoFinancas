@@ -16,35 +16,45 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(erro: Error, info: ErrorInfo) {
-    console.error("Erro não tratado no Caderno Financeiro:", erro, info.componentStack);
+    console.error("Erro não tratado no Nightfolio:", erro, info.componentStack);
   }
 
   render() {
     if (this.state.erro) {
       return (
-        <div style={{ maxWidth: 480, margin: "80px auto", padding: "0 24px", textAlign: "center", fontFamily: "'Inter', sans-serif" }}>
-          <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 22, marginBottom: 10 }}>
-            algo deu errado
+        <div
+          style={{
+            minHeight: "100vh",
+            background: "#0A0A0F",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div style={{ maxWidth: 480, padding: "0 24px", textAlign: "center", fontFamily: "'Inter', sans-serif" }}>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 22, marginBottom: 10, color: "#F4F4F8" }}>
+              algo deu errado
+            </div>
+            <p style={{ color: "#9A99AE", fontSize: 14, marginBottom: 20 }}>
+              Aconteceu um erro inesperado na tela. Seus dados continuam salvos no navegador — recarregue a página
+              para tentar de novo.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                padding: "8px 18px",
+                borderRadius: 8,
+                border: "1.5px solid #7C6CF6",
+                background: "#7C6CF6",
+                color: "#F4F4F8",
+                fontSize: 13.5,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Recarregar
+            </button>
           </div>
-          <p style={{ color: "#5C6B78", fontSize: 14, marginBottom: 20 }}>
-            Aconteceu um erro inesperado na tela. Seus dados continuam salvos no navegador — recarregue a página
-            para tentar de novo.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              padding: "8px 18px",
-              borderRadius: 5,
-              border: "1.5px solid #20303F",
-              background: "#20303F",
-              color: "#EDE6D4",
-              fontSize: 13.5,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Recarregar
-          </button>
         </div>
       );
     }

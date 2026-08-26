@@ -8,14 +8,14 @@ interface Props {
   corDestaque?: string;
 }
 
-export function SeletorMes({ refDate, mudarMes, corDestaque = "var(--rust)" }: Props) {
+export function SeletorMes({ refDate, mudarMes, corDestaque = "var(--accent)" }: Props) {
   const botaoSeta: CSSProperties = {
     width: 32,
     height: 32,
     borderRadius: "50%",
-    border: "1.5px solid var(--ink)",
-    background: "transparent",
-    color: "var(--ink)",
+    border: "1px solid var(--border-strong)",
+    background: "var(--surface-glass)",
+    color: "var(--ink-soft)",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
@@ -29,19 +29,23 @@ export function SeletorMes({ refDate, mudarMes, corDestaque = "var(--rust)" }: P
       </button>
       <div
         style={{
-          border: `2px solid ${corDestaque}`,
-          borderRadius: 6,
-          padding: "6px 20px",
-          transform: "rotate(-1.2deg)",
-          color: corDestaque,
-          fontFamily: "'Fraunces', serif",
-          fontWeight: 700,
-          fontSize: 15,
-          letterSpacing: "0.05em",
+          border: "1px solid var(--border)",
+          borderRadius: 8,
+          padding: "6px 18px",
+          background: "var(--surface-glass)",
+          color: "var(--ink)",
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontWeight: 600,
+          fontSize: 14.5,
+          letterSpacing: "0.04em",
           textTransform: "uppercase",
           userSelect: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
         }}
       >
+        <span style={{ width: 6, height: 6, borderRadius: "50%", background: corDestaque, flex: "0 0 auto" }} />
         {MESES[refDate.getMonth()]} · {refDate.getFullYear()}
       </div>
       <button onClick={() => mudarMes(1)} aria-label="Próximo mês" className="cf-btn cf-focus" style={botaoSeta}>

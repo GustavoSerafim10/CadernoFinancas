@@ -1,10 +1,13 @@
 import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Investimento } from "../types";
 import { TIPOS_INVESTIMENTO } from "../constants";
 import { formatarMoeda, formatarPct, parseMoeda } from "../utils/format";
 import { IconeX, IconeEditar } from "../components/Icones";
-import { rotuloCampo, campoInput, cartaoEstilo, botaoPrimario, linkDiscreto } from "../components/estilosComuns";
+import { NumeroAnimado } from "../components/NumeroAnimado";
+import { rotuloCampo, campoInput, cartaoEstilo, botaoPrimario, botaoGhost, linkDiscreto } from "../components/estilosComuns";
+import { CHART_STROKE_SEPARATOR, CHART_TOOLTIP_STYLE, CORES_TIPO_INVESTIMENTO } from "../components/chartTheme";
 
 interface Props {
   investimentos: Investimento[];
@@ -12,8 +15,6 @@ interface Props {
   removerInvestimento: (id: string) => void;
   atualizarInvestimento: (id: string, campos: Partial<Investimento>) => void;
 }
-
-const CORES_TIPO = ["#20303F", "#2E7D5E", "#A8462B", "#B8862B", "#6B5B95", "#7A7166"];
 
 export function Investimentos({ investimentos, adicionarInvestimento, removerInvestimento, atualizarInvestimento }: Props) {
   const [nome, setNome] = useState("");
@@ -58,13 +59,13 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
     const porTipo = TIPOS_INVESTIMENTO.map((t, i) => ({
       tipo: t,
       valor: investimentos.filter((inv) => inv.tipo === t).reduce((s, inv) => s + inv.valorAtual, 0),
-      cor: CORES_TIPO[i % CORES_TIPO.length],
+      cor: CORES_TIPO_INVESTIMENTO[i % CORES_TIPO_INVESTIMENTO.length],
     })).filter((t) => t.valor > 0);
     return { totalAportado, totalAtual, rentabilidade, porTipo };
   }, [investimentos]);
 
   return (
-    <div>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
       <section style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
           <div style={{ ...rotuloCampo, marginBottom: 0 }}>{editandoId ? "editando posição" : "adicionar posição"}</div>
@@ -98,15 +99,15 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
       {investimentos.length > 0 && (
         <>
           <section style={{ ...cartaoEstilo, marginBottom: 32 }}>
-            <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 15, marginBottom: 16 }}>carteira</div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 15, marginBottom: 16 }}>carteira</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 16 }}>
               <div>
                 <div style={rotuloCampo}>total aportado</div>
-                <div className="cf-num" style={{ fontSize: 19, fontWeight: 600 }}>{formatarMoeda(totais.totalAportado)}</div>
+                <NumeroAnimado valor={totais.totalAportado} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600 }} />
               </div>
               <div>
                 <div style={rotuloCampo}>valor atual</div>
-                <div className="cf-num" style={{ fontSize: 19, fontWeight: 600 }}>{formatarMoeda(totais.totalAtual)}</div>
+                <NumeroAnimado valor={totais.totalAtual} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600 }} />
               </div>
               <div>
                 <div style={rotuloCampo}>rentabilidade</div>
@@ -123,9 +124,9 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={totais.porTipo} dataKey="valor" nameKey="tipo" innerRadius={50} outerRadius={90} paddingAngle={2}>
-                      {totais.porTipo.map((t, i) => <Cell key={i} fill={t.cor} stroke="var(--paper)" strokeWidth={2} />)}
+                      {totais.porTipo.map((t, i) => <Cell key={i} fill={t.cor} stroke={CHART_STROKE_SEPARATOR} strokeWidth={2} />)}
                     </Pie>
-                    <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={{ background: "#EDE6D4", border: "1px solid #20303F", borderRadius: 6, fontSize: 13 }} />
+                    <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -143,11 +144,18 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
 
           <section>
             <div style={rotuloCampo}>posições</div>
-            {investimentos.map((inv) => {
+            {investimentos.map((inv, i) => {
               const rent = inv.valorAportado > 0 ? ((inv.valorAtual - inv.valorAportado) / inv.valorAportado) * 100 : 0;
               const rotulo = `${inv.nome}, ${inv.tipo}, ${formatarMoeda(inv.valorAtual)}`;
               return (
-                <div key={inv.id} className="cf-linha" style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid var(--paper-linha)" }}>
+                <motion.div
+                  key={inv.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: i * 0.03 }}
+                  className="cf-linha"
+                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid var(--paper-linha)" }}
+                >
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14.5 }}>{inv.nome}</div>
                     <div style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase" }}>{inv.tipo}</div>
@@ -169,7 +177,7 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                     onClick={() => iniciarEdicao(inv)}
                     aria-label={`Editar ${rotulo}`}
                     className="cf-linha-remover cf-focus"
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}
+                    style={botaoGhost}
                   >
                     <IconeEditar />
                   </button>
@@ -179,16 +187,16 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                     }}
                     aria-label={`Remover ${rotulo}`}
                     className="cf-linha-remover cf-focus"
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}
+                    style={botaoGhost}
                   >
                     <IconeX />
                   </button>
-                </div>
+                </motion.div>
               );
             })}
           </section>
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

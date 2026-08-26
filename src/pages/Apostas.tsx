@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Aposta, ResumoApostas } from "../types";
 import { formatarMoeda, formatarPct, parseMoeda } from "../utils/format";
 import { SeletorMes } from "../components/SeletorMes";
 import { IconeX } from "../components/Icones";
-import { rotuloCampo, campoInput, cartaoEstilo, botaoPrimario, botaoSecundario, linkDiscreto } from "../components/estilosComuns";
+import { NumeroAnimado } from "../components/NumeroAnimado";
+import {
+  rotuloCampo, campoInput, cartaoEstilo, botaoPrimario, botaoSecundario, botaoGhost, linkDiscreto, badgeEstilo,
+} from "../components/estilosComuns";
 
 interface Props {
   refDate: Date;
@@ -64,8 +68,8 @@ export function Apostas({
   const lista = [...apostasDoMes].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 
   return (
-    <div>
-      <SeletorMes refDate={refDate} mudarMes={mudarMes} corDestaque="#7A3E5E" />
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
+      <SeletorMes refDate={refDate} mudarMes={mudarMes} />
 
       <section style={{ marginBottom: 30 }}>
         <div style={rotuloCampo}>nova aposta</div>
@@ -97,25 +101,24 @@ export function Apostas({
       </section>
 
       <section style={{ ...cartaoEstilo, marginBottom: 32 }}>
-        <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 15, marginBottom: 16 }}>resumo do mês</div>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 15, marginBottom: 16 }}>resumo do mês</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 16 }}>
           <div>
             <div style={rotuloCampo}>apostado</div>
-            <div className="cf-num" style={{ fontSize: 19, fontWeight: 600 }}>{formatarMoeda(resumoApostas.apostado)}</div>
+            <NumeroAnimado valor={resumoApostas.apostado} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600 }} />
           </div>
           <div>
             <div style={rotuloCampo}>retorno</div>
-            <div className="cf-num" style={{ fontSize: 19, fontWeight: 600 }}>{formatarMoeda(resumoApostas.retorno)}</div>
+            <NumeroAnimado valor={resumoApostas.retorno} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600 }} />
           </div>
           <div>
             <div style={rotuloCampo}>lucro líquido</div>
-            <div
+            <NumeroAnimado
+              valor={resumoApostas.lucro}
+              formatar={(v) => `${v >= 0 ? "+" : ""}${formatarMoeda(v)}`}
               className="cf-num"
               style={{ fontSize: 19, fontWeight: 700, color: resumoApostas.lucro >= 0 ? "var(--verde)" : "var(--rust)" }}
-            >
-              {resumoApostas.lucro >= 0 ? "+" : ""}
-              {formatarMoeda(resumoApostas.lucro)}
-            </div>
+            />
           </div>
           <div>
             <div style={rotuloCampo}>taxa de acerto</div>
@@ -136,20 +139,27 @@ export function Apostas({
         {lista.length === 0 ? (
           <p style={{ color: "var(--ink-soft)", fontSize: 14, fontStyle: "italic" }}>nenhuma aposta registrada esse mês.</p>
         ) : (
-          lista.map((a) => {
+          <AnimatePresence initial={false}>
+          {lista.map((a, i) => {
             const lucro = a.resultado === "ganhou" ? a.retorno - a.valorApostado : a.resultado === "perdeu" ? -a.valorApostado : 0;
             const corStatus =
               a.resultado === "ganhou" ? "var(--verde)" : a.resultado === "perdeu" ? "var(--rust)" : "var(--ink-soft)";
             const rotuloStatus = a.resultado === "ganhou" ? "ganhou" : a.resultado === "perdeu" ? "perdeu" : "pendente";
             const rotulo = `${a.descricao}, ${formatarMoeda(a.valorApostado)}, ${new Date(a.data).toLocaleDateString("pt-BR")}`;
             return (
-              <div key={a.id} className="cf-linha" style={{ padding: "10px 0", borderBottom: "1px solid var(--paper-linha)" }}>
+              <motion.div
+                key={a.id}
+                layout
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.22, delay: i * 0.03 }}
+                className="cf-linha"
+                style={{ padding: "10px 0", borderBottom: "1px solid var(--paper-linha)" }}
+              >
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: corStatus, flex: "0 0 auto" }} />
                   <span style={{ flex: 1, fontSize: 14.5 }}>{a.descricao}</span>
-                  <span style={{ fontSize: 11.5, color: corStatus, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                    {rotuloStatus}
-                  </span>
+                  <span style={badgeEstilo(corStatus)}>{rotuloStatus}</span>
                   <span className="cf-num" style={{ fontSize: 13, color: "var(--ink-soft)", minWidth: 84, textAlign: "right" }}>
                     {formatarMoeda(a.valorApostado)}
                   </span>
@@ -193,7 +203,7 @@ export function Apostas({
                     onClick={() => handleRemover(a)}
                     aria-label={`Remover ${rotulo}`}
                     className="cf-focus"
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4, display: "flex" }}
+                    style={botaoGhost}
                   >
                     <IconeX />
                   </button>
@@ -218,11 +228,12 @@ export function Apostas({
                     </button>
                   </div>
                 )}
-              </div>
+              </motion.div>
             );
-          })
+          })}
+          </AnimatePresence>
         )}
       </section>
-    </div>
+    </motion.div>
   );
 }

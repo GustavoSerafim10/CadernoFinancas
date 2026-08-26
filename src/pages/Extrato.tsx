@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Conta, Transacao, Recorrencia, TipoTransacao } from "../types";
 import { CATEGORIAS, catLabel, catCor } from "../constants";
 import { formatarMoeda, parseMoeda } from "../utils/format";
 import { SeletorMes } from "../components/SeletorMes";
 import { IconeX, IconeEditar } from "../components/Icones";
-import { rotuloCampo, campoInput, botaoPrimario, botaoSecundario, linkDiscreto } from "../components/estilosComuns";
+import { rotuloCampo, campoInput, botaoPrimario, botaoSecundario, botaoGhost, linkDiscreto } from "../components/estilosComuns";
 
 interface Props {
   refDate: Date;
@@ -125,8 +126,8 @@ export function Extrato({
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 
   return (
-    <div>
-      <SeletorMes refDate={refDate} mudarMes={mudarMesECancelarEdicao} corDestaque="var(--rust)" />
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
+      <SeletorMes refDate={refDate} mudarMes={mudarMesECancelarEdicao} />
 
       <section style={{ marginBottom: 30 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
@@ -192,7 +193,7 @@ export function Extrato({
                   <span key={c.id} style={{ display: "flex", alignItems: "center", gap: 6, border: "1px solid var(--paper-linha)", borderRadius: 20, padding: "4px 10px 4px 12px", fontSize: 13 }}>
                     {c.nome}
                     {contas.length > 1 && (
-                      <button onClick={() => handleRemoverConta(c)} className="cf-focus" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", display: "flex" }}>
+                      <button onClick={() => handleRemoverConta(c)} className="cf-focus" style={botaoGhost}>
                         <IconeX />
                       </button>
                     )}
@@ -208,7 +209,7 @@ export function Extrato({
                   style={{ ...campoInput, maxWidth: 240 }}
                 />
                 <button
-                  onClick={() => { if (novaContaNome.trim()) { adicionarConta(novaContaNome.trim(), "#20303F"); setNovaContaNome(""); } }}
+                  onClick={() => { if (novaContaNome.trim()) { adicionarConta(novaContaNome.trim(), "#7C6CF6"); setNovaContaNome(""); } }}
                   className="cf-focus"
                   style={botaoSecundario}
                 >
@@ -232,7 +233,7 @@ export function Extrato({
                       <button onClick={() => toggleRecorrencia(r.id)} className="cf-focus" style={{ ...botaoSecundario, padding: "3px 10px", fontSize: 11.5 }}>
                         {r.ativa ? "pausar" : "ativar"}
                       </button>
-                      <button onClick={() => handleRemoverRecorrencia(r)} className="cf-focus" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", display: "flex" }}>
+                      <button onClick={() => handleRemoverRecorrencia(r)} className="cf-focus" style={botaoGhost}>
                         <IconeX />
                       </button>
                     </div>
@@ -263,35 +264,46 @@ export function Extrato({
         {listaFiltrada.length === 0 ? (
           <p style={{ color: "var(--ink-soft)", fontSize: 14, fontStyle: "italic" }}>nada por aqui ainda esse mês.</p>
         ) : (
-          listaFiltrada.map((t) => {
-            const isReceita = t.tipo === "receita";
-            const isInv = t.tipo === "investimento";
-            const cor = isReceita ? "var(--ink)" : isInv ? "var(--verde)" : "var(--rust)";
-            const rotulo = `${t.descricao}, ${formatarMoeda(t.valor)}, ${new Date(t.data).toLocaleDateString("pt-BR")}`;
-            return (
-              <div key={t.id} className="cf-linha" style={{ display: "flex", alignItems: "center", gap: 12, padding: "9px 0", borderBottom: "1px solid var(--paper-linha)" }}>
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: isReceita ? "var(--ink)" : isInv ? "var(--verde)" : catCor(t.categoria), flex: "0 0 auto" }} />
-                <span style={{ flex: 1, fontSize: 14.5 }}>{t.descricao}</span>
-                <span style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase" }}>
-                  {contas.find((c) => c.id === t.contaId)?.nome || "—"}
-                </span>
-                <span style={{ fontSize: 11.5, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: "0.04em", minWidth: 78, textAlign: "right" }}>
-                  {isReceita ? "receita" : isInv ? "investimento" : catLabel(t.categoria)}
-                </span>
-                <span className="cf-num" style={{ fontSize: 15, fontWeight: 600, minWidth: 92, textAlign: "right", color: cor }}>
-                  {isReceita || isInv ? "+" : "−"} {formatarMoeda(t.valor)}
-                </span>
-                <button onClick={() => iniciarEdicao(t)} aria-label={`Editar ${rotulo}`} className="cf-linha-remover cf-focus" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}>
-                  <IconeEditar />
-                </button>
-                <button onClick={() => handleRemoverTransacao(t)} aria-label={`Remover ${rotulo}`} className="cf-linha-remover cf-focus" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}>
-                  <IconeX />
-                </button>
-              </div>
-            );
-          })
+          <AnimatePresence initial={false}>
+            {listaFiltrada.map((t, i) => {
+              const isReceita = t.tipo === "receita";
+              const isInv = t.tipo === "investimento";
+              const cor = isReceita ? "var(--ink)" : isInv ? "var(--verde)" : "var(--rust)";
+              const rotulo = `${t.descricao}, ${formatarMoeda(t.valor)}, ${new Date(t.data).toLocaleDateString("pt-BR")}`;
+              return (
+                <motion.div
+                  key={t.id}
+                  layout
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.22, delay: i * 0.02 }}
+                  className="cf-linha"
+                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "9px 0", borderBottom: "1px solid var(--paper-linha)" }}
+                >
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: isReceita ? "var(--ink)" : isInv ? "var(--verde)" : catCor(t.categoria), flex: "0 0 auto" }} />
+                  <span style={{ flex: 1, fontSize: 14.5 }}>{t.descricao}</span>
+                  <span style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase" }}>
+                    {contas.find((c) => c.id === t.contaId)?.nome || "—"}
+                  </span>
+                  <span style={{ fontSize: 11.5, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: "0.04em", minWidth: 78, textAlign: "right" }}>
+                    {isReceita ? "receita" : isInv ? "investimento" : catLabel(t.categoria)}
+                  </span>
+                  <span className="cf-num" style={{ fontSize: 15, fontWeight: 600, minWidth: 92, textAlign: "right", color: cor }}>
+                    {isReceita || isInv ? "+" : "−"} {formatarMoeda(t.valor)}
+                  </span>
+                  <button onClick={() => iniciarEdicao(t)} aria-label={`Editar ${rotulo}`} className="cf-linha-remover cf-focus" style={botaoGhost}>
+                    <IconeEditar />
+                  </button>
+                  <button onClick={() => handleRemoverTransacao(t)} aria-label={`Remover ${rotulo}`} className="cf-linha-remover cf-focus" style={botaoGhost}>
+                    <IconeX />
+                  </button>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         )}
       </section>
-    </div>
+    </motion.div>
   );
 }
