@@ -74,6 +74,12 @@ export function useFinancas(monthKey: string) {
     [transacoes, salvarTransacoes]
   );
 
+  const editarTransacao = useCallback(
+    (id: string, dados: Omit<Transacao, "id" | "recorrenciaId">) =>
+      salvarTransacoes(transacoes.map((t) => (t.id === id ? { ...t, ...dados } : t))),
+    [transacoes, salvarTransacoes]
+  );
+
   const adicionarConta = useCallback(
     (nome: string, cor: string) => salvarContas([...contas, { id: gerarId("c"), nome, cor }]),
     [contas, salvarContas]
@@ -186,7 +192,7 @@ export function useFinancas(monthKey: string) {
   return {
     contas, transacoes, recorrencias, metas, investimentos, carregando, erro,
     transacoesDoMes, resumoMes, historicoMensal, insights,
-    adicionarTransacao, removerTransacao,
+    adicionarTransacao, removerTransacao, editarTransacao,
     adicionarConta, removerConta,
     adicionarRecorrencia, toggleRecorrencia, removerRecorrencia, gerarLancamentosDoMes,
     setMetaCategoria,

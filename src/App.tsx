@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, Suspense, lazy } from "react";
 import { Nav } from "./components/Nav";
 import { useFinancas } from "./hooks/useFinancas";
 import { chaveDoMes } from "./utils/date";
 import { PaginaId } from "./constants";
-import { Dashboard } from "./pages/Dashboard";
 import { Extrato } from "./pages/Extrato";
-import { Investimentos } from "./pages/Investimentos";
 import { Metas } from "./pages/Metas";
+
+const Dashboard = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })));
+const Investimentos = lazy(() => import("./pages/Investimentos").then((m) => ({ default: m.Investimentos })));
 
 export default function App() {
   const [refDate, setRefDate] = useState(new Date());
@@ -73,47 +74,52 @@ export default function App() {
 
         {financas.carregando ? (
           <div className="carregando">carregando seus dados…</div>
-        ) : pagina === "dashboard" ? (
-          <Dashboard
-            refDate={refDate}
-            mudarMes={mudarMes}
-            resumoMes={financas.resumoMes}
-            historicoMensal={financas.historicoMensal}
-            insights={financas.insights}
-            exportarCSV={exportarCSV}
-            exportarTudoJSON={exportarTudoJSON}
-          />
-        ) : pagina === "extrato" ? (
-          <Extrato
-            refDate={refDate}
-            mudarMes={mudarMes}
-            monthKey={monthKey}
-            transacoesDoMes={financas.transacoesDoMes}
-            contas={financas.contas}
-            recorrencias={financas.recorrencias}
-            adicionarTransacao={financas.adicionarTransacao}
-            removerTransacao={financas.removerTransacao}
-            adicionarConta={financas.adicionarConta}
-            removerConta={financas.removerConta}
-            adicionarRecorrencia={financas.adicionarRecorrencia}
-            toggleRecorrencia={financas.toggleRecorrencia}
-            removerRecorrencia={financas.removerRecorrencia}
-            gerarLancamentosDoMes={financas.gerarLancamentosDoMes}
-          />
-        ) : pagina === "investimentos" ? (
-          <Investimentos
-            investimentos={financas.investimentos}
-            adicionarInvestimento={financas.adicionarInvestimento}
-            removerInvestimento={financas.removerInvestimento}
-            atualizarInvestimento={financas.atualizarInvestimento}
-          />
         ) : (
-          <Metas
-            metas={financas.metas}
-            setMetaCategoria={financas.setMetaCategoria}
-            resumoMes={financas.resumoMes}
-            refDate={refDate}
-          />
+          <Suspense fallback={<div className="carregando">carregando…</div>}>
+            {pagina === "dashboard" ? (
+              <Dashboard
+                refDate={refDate}
+                mudarMes={mudarMes}
+                resumoMes={financas.resumoMes}
+                historicoMensal={financas.historicoMensal}
+                insights={financas.insights}
+                exportarCSV={exportarCSV}
+                exportarTudoJSON={exportarTudoJSON}
+              />
+            ) : pagina === "extrato" ? (
+              <Extrato
+                refDate={refDate}
+                mudarMes={mudarMes}
+                monthKey={monthKey}
+                transacoesDoMes={financas.transacoesDoMes}
+                contas={financas.contas}
+                recorrencias={financas.recorrencias}
+                adicionarTransacao={financas.adicionarTransacao}
+                removerTransacao={financas.removerTransacao}
+                editarTransacao={financas.editarTransacao}
+                adicionarConta={financas.adicionarConta}
+                removerConta={financas.removerConta}
+                adicionarRecorrencia={financas.adicionarRecorrencia}
+                toggleRecorrencia={financas.toggleRecorrencia}
+                removerRecorrencia={financas.removerRecorrencia}
+                gerarLancamentosDoMes={financas.gerarLancamentosDoMes}
+              />
+            ) : pagina === "investimentos" ? (
+              <Investimentos
+                investimentos={financas.investimentos}
+                adicionarInvestimento={financas.adicionarInvestimento}
+                removerInvestimento={financas.removerInvestimento}
+                atualizarInvestimento={financas.atualizarInvestimento}
+              />
+            ) : (
+              <Metas
+                metas={financas.metas}
+                setMetaCategoria={financas.setMetaCategoria}
+                resumoMes={financas.resumoMes}
+                refDate={refDate}
+              />
+            )}
+          </Suspense>
         )}
       </div>
     </div>

@@ -3,8 +3,8 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Investimento } from "../types";
 import { TIPOS_INVESTIMENTO } from "../constants";
 import { formatarMoeda, formatarPct, parseMoeda } from "../utils/format";
-import { IconeX } from "../components/Icones";
-import { rotuloCampo, campoInput, cartaoEstilo, botaoPrimario } from "../components/estilosComuns";
+import { IconeX, IconeEditar } from "../components/Icones";
+import { rotuloCampo, campoInput, cartaoEstilo, botaoPrimario, linkDiscreto } from "../components/estilosComuns";
 
 interface Props {
   investimentos: Investimento[];
@@ -20,16 +20,35 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
   const [tipo, setTipo] = useState<string>(TIPOS_INVESTIMENTO[0]);
   const [aportado, setAportado] = useState("");
   const [atual, setAtual] = useState("");
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+
+  function limparFormulario() {
+    setNome("");
+    setAportado("");
+    setAtual("");
+    setTipo(TIPOS_INVESTIMENTO[0]);
+    setEditandoId(null);
+  }
+
+  function iniciarEdicao(inv: Investimento) {
+    setEditandoId(inv.id);
+    setNome(inv.nome);
+    setTipo(inv.tipo);
+    setAportado(String(inv.valorAportado).replace(".", ","));
+    setAtual(String(inv.valorAtual).replace(".", ","));
+  }
 
   function submeter(e: React.FormEvent) {
     e.preventDefault();
     const va = parseMoeda(aportado);
     const vt = parseMoeda(atual);
     if (!nome.trim() || va === null || vt === null || va <= 0) return;
-    adicionarInvestimento({ nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt, data: new Date().toISOString() });
-    setNome("");
-    setAportado("");
-    setAtual("");
+    if (editandoId) {
+      atualizarInvestimento(editandoId, { nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt });
+    } else {
+      adicionarInvestimento({ nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt, data: new Date().toISOString() });
+    }
+    limparFormulario();
   }
 
   const totais = useMemo(() => {
@@ -47,7 +66,14 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
   return (
     <div>
       <section style={{ marginBottom: 28 }}>
-        <div style={rotuloCampo}>adicionar posição</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          <div style={{ ...rotuloCampo, marginBottom: 0 }}>{editandoId ? "editando posição" : "adicionar posição"}</div>
+          {editandoId && (
+            <button onClick={limparFormulario} className="cf-focus" style={linkDiscreto}>
+              cancelar
+            </button>
+          )}
+        </div>
         <form onSubmit={submeter} style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end" }}>
           <div style={{ flex: "2 1 160px" }}>
             <input className="cf-focus" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="nome — ex: Tesouro Selic 2029" style={campoInput} />
@@ -63,7 +89,9 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
           <div style={{ flex: "1 1 110px" }}>
             <input className="cf-num cf-focus" value={atual} onChange={(e) => setAtual(e.target.value)} placeholder="valor atual" inputMode="decimal" style={campoInput} />
           </div>
-          <button type="submit" className="cf-btn cf-focus" style={botaoPrimario}>Adicionar</button>
+          <button type="submit" className="cf-btn cf-focus" style={botaoPrimario}>
+            {editandoId ? "Salvar" : "Adicionar"}
+          </button>
         </form>
       </section>
 
@@ -124,6 +152,7 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                     <div style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase" }}>{inv.tipo}</div>
                   </div>
                   <input
+                    key={`${inv.id}-${inv.valorAtual}`}
                     className="cf-num cf-focus"
                     defaultValue={inv.valorAtual}
                     onBlur={(e) => {
@@ -136,9 +165,18 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                     {formatarPct(rent)}
                   </span>
                   <button
+                    onClick={() => iniciarEdicao(inv)}
+                    aria-label={`Editar ${inv.nome}`}
+                    className="cf-linha-remover cf-focus"
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}
+                  >
+                    <IconeEditar />
+                  </button>
+                  <button
                     onClick={() => {
                       if (window.confirm(`Excluir a posição "${inv.nome}"?`)) removerInvestimento(inv.id);
                     }}
+                    aria-label={`Remover ${inv.nome}`}
                     className="cf-linha-remover cf-focus"
                     style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}
                   >

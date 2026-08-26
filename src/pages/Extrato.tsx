@@ -3,7 +3,7 @@ import { Conta, Transacao, Recorrencia, TipoTransacao } from "../types";
 import { CATEGORIAS, catLabel, catCor } from "../constants";
 import { formatarMoeda, parseMoeda } from "../utils/format";
 import { SeletorMes } from "../components/SeletorMes";
-import { IconeX } from "../components/Icones";
+import { IconeX, IconeEditar } from "../components/Icones";
 import { rotuloCampo, campoInput, botaoPrimario, botaoSecundario, linkDiscreto } from "../components/estilosComuns";
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
   recorrencias: Recorrencia[];
   adicionarTransacao: (dados: Omit<Transacao, "id" | "recorrenciaId">) => void;
   removerTransacao: (id: string) => void;
+  editarTransacao: (id: string, dados: Omit<Transacao, "id" | "recorrenciaId">) => void;
   adicionarConta: (nome: string, cor: string) => void;
   removerConta: (id: string) => boolean;
   adicionarRecorrencia: (r: Omit<Recorrencia, "id" | "ativa">) => void;
@@ -25,7 +26,7 @@ interface Props {
 
 export function Extrato({
   refDate, mudarMes, transacoesDoMes, contas, recorrencias,
-  adicionarTransacao, removerTransacao, adicionarConta, removerConta,
+  adicionarTransacao, removerTransacao, editarTransacao, adicionarConta, removerConta,
   adicionarRecorrencia, toggleRecorrencia, removerRecorrencia, gerarLancamentosDoMes,
 }: Props) {
   const [descricao, setDescricao] = useState("");
@@ -41,35 +42,50 @@ export function Extrato({
   const [novaContaNome, setNovaContaNome] = useState("");
   const [mostrarGestao, setMostrarGestao] = useState(false);
   const [msgGerar, setMsgGerar] = useState<string | null>(null);
+  const [editandoId, setEditandoId] = useState<string | null>(null);
 
   const contaSelecionada = contaId || contas[0]?.id || "";
+
+  function limparFormulario() {
+    setDescricao("");
+    setValor("");
+    setTornarRecorrente(false);
+    setEditandoId(null);
+  }
+
+  function iniciarEdicao(t: Transacao) {
+    setEditandoId(t.id);
+    setDescricao(t.descricao);
+    setValor(String(t.valor).replace(".", ","));
+    setCategoria(t.categoria || CATEGORIAS[0].id);
+    setTipo(t.tipo);
+    setContaId(t.contaId);
+    setData(t.data.slice(0, 10));
+    setTornarRecorrente(false);
+  }
 
   function submeter(e: React.FormEvent) {
     e.preventDefault();
     const v = parseMoeda(valor);
     if (!descricao.trim() || v === null || v <= 0 || !contaSelecionada) return;
     const dataISO = `${data}T12:00:00.000Z`;
-    adicionarTransacao({
+    const dados = {
       descricao: descricao.trim(),
       valor: v,
       categoria: tipo === "gasto" ? categoria : null,
       tipo,
       contaId: contaSelecionada,
       data: dataISO,
-    });
-    if (tornarRecorrente) {
-      adicionarRecorrencia({
-        descricao: descricao.trim(),
-        valor: v,
-        categoria: tipo === "gasto" ? categoria : null,
-        tipo,
-        contaId: contaSelecionada,
-        diaDoMes: new Date(data).getDate(),
-      });
+    };
+    if (editandoId) {
+      editarTransacao(editandoId, dados);
+    } else {
+      adicionarTransacao(dados);
+      if (tornarRecorrente) {
+        adicionarRecorrencia({ ...dados, diaDoMes: new Date(data).getDate() });
+      }
     }
-    setDescricao("");
-    setValor("");
-    setTornarRecorrente(false);
+    limparFormulario();
   }
 
   function gerar() {
@@ -108,7 +124,14 @@ export function Extrato({
       <SeletorMes refDate={refDate} mudarMes={mudarMes} corDestaque="var(--rust)" />
 
       <section style={{ marginBottom: 30 }}>
-        <div style={rotuloCampo}>novo lançamento</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          <div style={{ ...rotuloCampo, marginBottom: 0 }}>{editandoId ? "editando lançamento" : "novo lançamento"}</div>
+          {editandoId && (
+            <button onClick={limparFormulario} className="cf-focus" style={linkDiscreto}>
+              cancelar
+            </button>
+          )}
+        </div>
         <form onSubmit={submeter} style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end", marginBottom: 8 }}>
           <div style={{ flex: "2 1 160px" }}>
             <input className="cf-focus" value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="descrição" style={campoInput} />
@@ -138,12 +161,16 @@ export function Extrato({
           <div style={{ flex: "1 1 130px" }}>
             <input type="date" className="cf-focus" value={data} onChange={(e) => setData(e.target.value)} style={campoInput} />
           </div>
-          <button type="submit" className="cf-btn cf-focus" style={botaoPrimario}>Anotar</button>
+          <button type="submit" className="cf-btn cf-focus" style={botaoPrimario}>
+            {editandoId ? "Salvar" : "Anotar"}
+          </button>
         </form>
-        <label style={{ fontSize: 12.5, color: "var(--ink-soft)", display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-          <input type="checkbox" checked={tornarRecorrente} onChange={(e) => setTornarRecorrente(e.target.checked)} />
-          tornar recorrente (repete todo mês no mesmo dia)
-        </label>
+        {!editandoId && (
+          <label style={{ fontSize: 12.5, color: "var(--ink-soft)", display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+            <input type="checkbox" checked={tornarRecorrente} onChange={(e) => setTornarRecorrente(e.target.checked)} />
+            tornar recorrente (repete todo mês no mesmo dia)
+          </label>
+        )}
       </section>
 
       <section style={{ marginBottom: 24 }}>
@@ -248,6 +275,9 @@ export function Extrato({
                 <span className="cf-num" style={{ fontSize: 15, fontWeight: 600, minWidth: 92, textAlign: "right", color: cor }}>
                   {isReceita || isInv ? "+" : "−"} {formatarMoeda(t.valor)}
                 </span>
+                <button onClick={() => iniciarEdicao(t)} aria-label={`Editar ${t.descricao}`} className="cf-linha-remover cf-focus" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}>
+                  <IconeEditar />
+                </button>
                 <button onClick={() => handleRemoverTransacao(t)} aria-label={`Remover ${t.descricao}`} className="cf-linha-remover cf-focus" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}>
                   <IconeX />
                 </button>
