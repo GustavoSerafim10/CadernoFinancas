@@ -145,6 +145,7 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
             <div style={rotuloCampo}>posições</div>
             {investimentos.map((inv) => {
               const rent = inv.valorAportado > 0 ? ((inv.valorAtual - inv.valorAportado) / inv.valorAportado) * 100 : 0;
+              const rotulo = `${inv.nome}, ${inv.tipo}, ${formatarMoeda(inv.valorAtual)}`;
               return (
                 <div key={inv.id} className="cf-linha" style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid var(--paper-linha)" }}>
                   <div style={{ flex: 1 }}>
@@ -166,7 +167,7 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                   </span>
                   <button
                     onClick={() => iniciarEdicao(inv)}
-                    aria-label={`Editar ${inv.nome}`}
+                    aria-label={`Editar ${rotulo}`}
                     className="cf-linha-remover cf-focus"
                     style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}
                   >
@@ -176,7 +177,7 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                     onClick={() => {
                       if (window.confirm(`Excluir a posição "${inv.nome}"?`)) removerInvestimento(inv.id);
                     }}
-                    aria-label={`Remover ${inv.nome}`}
+                    aria-label={`Remover ${rotulo}`}
                     className="cf-linha-remover cf-focus"
                     style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}
                   >

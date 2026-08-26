@@ -53,6 +53,11 @@ export function Extrato({
     setEditandoId(null);
   }
 
+  function mudarMesECancelarEdicao(delta: number) {
+    if (editandoId) limparFormulario();
+    mudarMes(delta);
+  }
+
   function iniciarEdicao(t: Transacao) {
     setEditandoId(t.id);
     setDescricao(t.descricao);
@@ -121,7 +126,7 @@ export function Extrato({
 
   return (
     <div>
-      <SeletorMes refDate={refDate} mudarMes={mudarMes} corDestaque="var(--rust)" />
+      <SeletorMes refDate={refDate} mudarMes={mudarMesECancelarEdicao} corDestaque="var(--rust)" />
 
       <section style={{ marginBottom: 30 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
@@ -262,6 +267,7 @@ export function Extrato({
             const isReceita = t.tipo === "receita";
             const isInv = t.tipo === "investimento";
             const cor = isReceita ? "var(--ink)" : isInv ? "var(--verde)" : "var(--rust)";
+            const rotulo = `${t.descricao}, ${formatarMoeda(t.valor)}, ${new Date(t.data).toLocaleDateString("pt-BR")}`;
             return (
               <div key={t.id} className="cf-linha" style={{ display: "flex", alignItems: "center", gap: 12, padding: "9px 0", borderBottom: "1px solid var(--paper-linha)" }}>
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: isReceita ? "var(--ink)" : isInv ? "var(--verde)" : catCor(t.categoria), flex: "0 0 auto" }} />
@@ -275,10 +281,10 @@ export function Extrato({
                 <span className="cf-num" style={{ fontSize: 15, fontWeight: 600, minWidth: 92, textAlign: "right", color: cor }}>
                   {isReceita || isInv ? "+" : "−"} {formatarMoeda(t.valor)}
                 </span>
-                <button onClick={() => iniciarEdicao(t)} aria-label={`Editar ${t.descricao}`} className="cf-linha-remover cf-focus" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}>
+                <button onClick={() => iniciarEdicao(t)} aria-label={`Editar ${rotulo}`} className="cf-linha-remover cf-focus" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}>
                   <IconeEditar />
                 </button>
-                <button onClick={() => handleRemoverTransacao(t)} aria-label={`Remover ${t.descricao}`} className="cf-linha-remover cf-focus" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}>
+                <button onClick={() => handleRemoverTransacao(t)} aria-label={`Remover ${rotulo}`} className="cf-linha-remover cf-focus" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", padding: 4 }}>
                   <IconeX />
                 </button>
               </div>
