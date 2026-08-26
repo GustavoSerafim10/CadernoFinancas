@@ -9,6 +9,7 @@ import { Metas } from "./pages/Metas";
 
 const Dashboard = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })));
 const Investimentos = lazy(() => import("./pages/Investimentos").then((m) => ({ default: m.Investimentos })));
+const Simulador = lazy(() => import("./pages/Simulador").then((m) => ({ default: m.Simulador })));
 
 export default function App() {
   const [refDate, setRefDate] = useState(new Date());
@@ -124,6 +125,8 @@ export default function App() {
                 reabrirAposta={financas.reabrirAposta}
                 removerAposta={financas.removerAposta}
               />
+            ) : pagina === "simulador" ? (
+              <Simulador />
             ) : (
               <Metas
                 metas={financas.metas}
