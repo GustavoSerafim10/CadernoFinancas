@@ -100,7 +100,7 @@ export function Apostas({
         </form>
       </section>
 
-      <section style={{ ...cartaoEstilo, marginBottom: 32 }}>
+      <section className="cf-card" style={{ ...cartaoEstilo, marginBottom: 32 }}>
         <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 15, marginBottom: 16 }}>resumo do mês</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 16 }}>
           <div>

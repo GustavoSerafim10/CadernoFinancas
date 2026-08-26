@@ -95,7 +95,7 @@ export function Simulador() {
 
       {resultado && resultado.saldos.length > 0 && (
         <>
-          <section style={{ ...cartaoEstilo, marginBottom: 32 }}>
+          <section className="cf-card" style={{ ...cartaoEstilo, marginBottom: 32 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 16 }}>
               <div>
                 <div style={rotuloCampo}>saldo final</div>

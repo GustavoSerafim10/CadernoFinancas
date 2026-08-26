@@ -1,6 +1,6 @@
 import { useState, Suspense, lazy } from "react";
 import { Nav } from "./components/Nav";
-import { Starfield } from "./components/Starfield";
+import { CosmicBackground } from "./components/CosmicBackground";
 import { useFinancas } from "./hooks/useFinancas";
 import { chaveDoMes } from "./utils/date";
 import { PaginaId } from "./constants";
@@ -65,7 +65,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Starfield />
+      <CosmicBackground />
       <div className="conteudo">
         <header className="cabecalho">
           <div className="eyebrow">Nightfolio</div>
