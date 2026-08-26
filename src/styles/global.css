@@ -107,7 +107,8 @@ body {
   opacity: 0;
   transition: opacity 0.15s ease;
 }
-.cf-linha:hover .cf-linha-remover {
+.cf-linha:hover .cf-linha-remover,
+.cf-linha:focus-within .cf-linha-remover {
   opacity: 1;
 }
 
