@@ -1,5 +1,5 @@
 {
-  "name": "caderno-financeiro",
+  "name": "nightfolio",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -11,6 +11,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "framer-motion": "^13.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.12.7"

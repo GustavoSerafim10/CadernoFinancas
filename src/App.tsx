@@ -63,11 +63,10 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <div className="margem-vermelha" />
       <div className="conteudo">
         <header className="cabecalho">
-          <div className="eyebrow">caderno financeiro</div>
-          <h1>controle completo das suas finanças</h1>
+          <div className="eyebrow">Nightfolio</div>
+          <h1>Clareza total sobre suas finanças.</h1>
         </header>
 
         <Nav pagina={pagina} setPagina={setPagina} />

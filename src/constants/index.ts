@@ -5,13 +5,13 @@ export interface Categoria {
 }
 
 export const CATEGORIAS: Categoria[] = [
-  { id: "moradia", label: "Moradia", cor: "#5B4A3F" },
-  { id: "alimentacao", label: "Alimentação", cor: "#A8462B" },
-  { id: "transporte", label: "Transporte", cor: "#8A5A2B" },
-  { id: "lazer", label: "Lazer", cor: "#6B5B95" },
-  { id: "saude", label: "Saúde", cor: "#2E7D6B" },
-  { id: "educacao", label: "Educação", cor: "#2B5D8A" },
-  { id: "outros", label: "Outros", cor: "#7A7166" },
+  { id: "moradia", label: "Moradia", cor: "#60A5FA" },
+  { id: "alimentacao", label: "Alimentação", cor: "#FB7185" },
+  { id: "transporte", label: "Transporte", cor: "#FBBF24" },
+  { id: "lazer", label: "Lazer", cor: "#34D399" },
+  { id: "saude", label: "Saúde", cor: "#2DD4BF" },
+  { id: "educacao", label: "Educação", cor: "#A78BFA" },
+  { id: "outros", label: "Outros", cor: "#94A3B8" },
 ];
 
 export const TIPOS_INVESTIMENTO = [
@@ -33,15 +33,14 @@ export type PaginaId = "dashboard" | "extrato" | "investimentos" | "apostas" | "
 export interface PaginaDef {
   id: PaginaId;
   label: string;
-  cor: string;
 }
 
 export const PAGINAS: PaginaDef[] = [
-  { id: "dashboard", label: "Dashboard", cor: "#20303F" },
-  { id: "extrato", label: "Extrato", cor: "#A8462B" },
-  { id: "investimentos", label: "Investimentos", cor: "#2E7D5E" },
-  { id: "apostas", label: "Apostas", cor: "#7A3E5E" },
-  { id: "metas", label: "Metas", cor: "#B8862B" },
+  { id: "dashboard", label: "Dashboard" },
+  { id: "extrato", label: "Extrato" },
+  { id: "investimentos", label: "Investimentos" },
+  { id: "apostas", label: "Apostas" },
+  { id: "metas", label: "Metas" },
 ];
 
 export function catLabel(id: string | null): string {

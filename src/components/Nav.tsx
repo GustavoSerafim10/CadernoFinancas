@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { PAGINAS, PaginaId } from "../constants";
 
 interface Props {
@@ -7,7 +8,15 @@ interface Props {
 
 export function Nav({ pagina, setPagina }: Props) {
   return (
-    <nav style={{ display: "flex", gap: 2, marginBottom: 28, flexWrap: "wrap", borderBottom: "1.5px solid var(--ink)" }}>
+    <nav
+      style={{
+        display: "flex",
+        gap: 4,
+        marginBottom: 32,
+        flexWrap: "wrap",
+        borderBottom: "1px solid var(--border)",
+      }}
+    >
       {PAGINAS.map((p) => {
         const ativa = pagina === p.id;
         return (
@@ -16,18 +25,31 @@ export function Nav({ pagina, setPagina }: Props) {
             onClick={() => setPagina(p.id)}
             className="cf-tab cf-focus"
             style={{
-              padding: "9px 18px",
+              position: "relative",
+              padding: "10px 18px",
               fontSize: 13.5,
-              letterSpacing: "0.03em",
-              color: ativa ? "var(--paper)" : p.cor,
-              background: ativa ? p.cor : "transparent",
-              borderRadius: "6px 6px 0 0",
-              marginBottom: -1.5,
-              border: `1.5px solid ${ativa ? p.cor : "transparent"}`,
-              borderBottom: ativa ? `1.5px solid ${p.cor}` : "1.5px solid transparent",
+              letterSpacing: "0.02em",
+              color: ativa ? "var(--ink)" : "var(--ink-soft)",
+              transition: "color 0.15s ease",
             }}
           >
             {p.label}
+            {ativa && (
+              <motion.div
+                layoutId="nav-indicador"
+                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                style={{
+                  position: "absolute",
+                  left: 6,
+                  right: 6,
+                  bottom: -1,
+                  height: 2,
+                  borderRadius: 2,
+                  background: "var(--accent)",
+                  boxShadow: "0 0 12px var(--accent-glow)",
+                }}
+              />
+            )}
           </button>
         );
       })}
