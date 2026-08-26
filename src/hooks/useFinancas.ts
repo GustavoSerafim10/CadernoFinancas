@@ -1,5 +1,16 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Conta, Transacao, Recorrencia, Investimento, Metas, ResumoMes, PontoHistorico } from "../types";
+import {
+  Conta,
+  Transacao,
+  Recorrencia,
+  Investimento,
+  Metas,
+  ResumoMes,
+  PontoHistorico,
+  Aposta,
+  ResultadoAposta,
+  ResumoApostas,
+} from "../types";
 import { getItem, setItem } from "../services/storage";
 import { gerarId, diasNoMes } from "../utils/date";
 import { CATEGORIAS } from "../constants";
@@ -11,6 +22,7 @@ export function useFinancas(monthKey: string) {
   const [recorrencias, setRecorrencias] = useState<Recorrencia[]>([]);
   const [metas, setMetas] = useState<Metas>({});
   const [investimentos, setInvestimentos] = useState<Investimento[]>([]);
+  const [apostas, setApostas] = useState<Aposta[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -28,6 +40,7 @@ export function useFinancas(monthKey: string) {
         setRecorrencias((await getItem<Recorrencia[]>("recorrencias")) || []);
         setMetas((await getItem<Metas>("metas")) || {});
         setInvestimentos((await getItem<Investimento[]>("investimentos")) || []);
+        setApostas((await getItem<Aposta[]>("apostas")) || []);
       } catch {
         setErro("Não consegui carregar seus dados agora.");
       } finally {
@@ -60,6 +73,10 @@ export function useFinancas(monthKey: string) {
   const salvarInvestimentos = useCallback(
     (n: Investimento[]) => persistir("investimentos", n, investimentos, setInvestimentos),
     [persistir, investimentos]
+  );
+  const salvarApostas = useCallback(
+    (n: Aposta[]) => persistir("apostas", n, apostas, setApostas),
+    [persistir, apostas]
   );
 
   const adicionarTransacao = useCallback(
@@ -156,10 +173,61 @@ export function useFinancas(monthKey: string) {
     [investimentos, salvarInvestimentos]
   );
 
+  const adicionarAposta = useCallback(
+    (descricao: string, valorApostado: number, data: string) => {
+      salvarApostas([
+        { id: gerarId("ap"), descricao, valorApostado, resultado: "pendente", retorno: 0, data },
+        ...apostas,
+      ]);
+    },
+    [apostas, salvarApostas]
+  );
+
+  const resolverAposta = useCallback(
+    (id: string, resultado: "ganhou" | "perdeu", retorno: number) =>
+      salvarApostas(
+        apostas.map((a) => (a.id === id ? { ...a, resultado, retorno: resultado === "ganhou" ? retorno : 0 } : a))
+      ),
+    [apostas, salvarApostas]
+  );
+
+  const reabrirAposta = useCallback(
+    (id: string) =>
+      salvarApostas(apostas.map((a) => (a.id === id ? { ...a, resultado: "pendente" as ResultadoAposta, retorno: 0 } : a))),
+    [apostas, salvarApostas]
+  );
+
+  const removerAposta = useCallback(
+    (id: string) => salvarApostas(apostas.filter((a) => a.id !== id)),
+    [apostas, salvarApostas]
+  );
+
   const transacoesDoMes = useMemo(
     () => transacoes.filter((t) => t.data.startsWith(monthKey)),
     [transacoes, monthKey]
   );
+
+  const apostasDoMes = useMemo(
+    () => apostas.filter((a) => a.data.startsWith(monthKey)),
+    [apostas, monthKey]
+  );
+
+  function lucroAposta(a: Aposta): number {
+    if (a.resultado === "ganhou") return a.retorno - a.valorApostado;
+    if (a.resultado === "perdeu") return -a.valorApostado;
+    return 0;
+  }
+
+  const resumoApostas: ResumoApostas = useMemo(() => {
+    const apostado = apostasDoMes.reduce((s, a) => s + a.valorApostado, 0);
+    const retorno = apostasDoMes.filter((a) => a.resultado === "ganhou").reduce((s, a) => s + a.retorno, 0);
+    const lucro = apostasDoMes.reduce((s, a) => s + lucroAposta(a), 0);
+    const ganhas = apostasDoMes.filter((a) => a.resultado === "ganhou").length;
+    const perdidas = apostasDoMes.filter((a) => a.resultado === "perdeu").length;
+    const pendentes = apostasDoMes.filter((a) => a.resultado === "pendente").length;
+    const taxaAcerto = ganhas + perdidas > 0 ? (ganhas / (ganhas + perdidas)) * 100 : 0;
+    return { apostado, retorno, lucro, ganhas, perdidas, pendentes, taxaAcerto };
+  }, [apostasDoMes]);
 
   const resumoMes: ResumoMes = useMemo(() => {
     const receita = transacoesDoMes.filter((t) => t.tipo === "receita").reduce((s, t) => s + t.valor, 0);
@@ -171,32 +239,36 @@ export function useFinancas(monthKey: string) {
         .filter((t) => t.tipo === "gasto" && t.categoria === c.id)
         .reduce((s, t) => s + t.valor, 0),
     })).filter((c) => c.total > 0);
-    return { receita, gastos, investido, saldo: receita - gastos - investido, porCategoria };
-  }, [transacoesDoMes]);
+    return { receita, gastos, investido, saldo: receita - gastos - investido + resumoApostas.lucro, porCategoria };
+  }, [transacoesDoMes, resumoApostas.lucro]);
 
   const historicoMensal: PontoHistorico[] = useMemo(() => {
     const chaves = Array.from(new Set(transacoes.map((t) => t.data.slice(0, 7)))).sort().slice(-6);
     return chaves.map((mk) => {
       const doMes = transacoes.filter((t) => t.data.startsWith(mk));
+      const apostasMes = apostas.filter((a) => a.data.startsWith(mk));
       return {
         chave: mk,
         receita: doMes.filter((t) => t.tipo === "receita").reduce((s, t) => s + t.valor, 0),
         gastos: doMes.filter((t) => t.tipo === "gasto").reduce((s, t) => s + t.valor, 0),
         investido: doMes.filter((t) => t.tipo === "investimento").reduce((s, t) => s + t.valor, 0),
+        lucroApostas: apostasMes.reduce((s, a) => s + lucroAposta(a), 0),
       };
     });
-  }, [transacoes]);
+  }, [transacoes, apostas]);
 
   const insights = useMemo(() => calcularInsights(transacoes, monthKey), [transacoes, monthKey]);
 
   return {
-    contas, transacoes, recorrencias, metas, investimentos, carregando, erro,
+    contas, transacoes, recorrencias, metas, investimentos, apostas, carregando, erro,
     transacoesDoMes, resumoMes, historicoMensal, insights,
+    apostasDoMes, resumoApostas,
     adicionarTransacao, removerTransacao, editarTransacao,
     adicionarConta, removerConta,
     adicionarRecorrencia, toggleRecorrencia, removerRecorrencia, gerarLancamentosDoMes,
     setMetaCategoria,
     adicionarInvestimento, removerInvestimento, atualizarInvestimento,
+    adicionarAposta, resolverAposta, reabrirAposta, removerAposta,
   };
 }
 

@@ -4,6 +4,7 @@ import { useFinancas } from "./hooks/useFinancas";
 import { chaveDoMes } from "./utils/date";
 import { PaginaId } from "./constants";
 import { Extrato } from "./pages/Extrato";
+import { Apostas } from "./pages/Apostas";
 import { Metas } from "./pages/Metas";
 
 const Dashboard = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })));
@@ -49,6 +50,7 @@ export default function App() {
       recorrencias: financas.recorrencias,
       metas: financas.metas,
       investimentos: financas.investimentos,
+      apostas: financas.apostas,
     };
     const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -83,6 +85,7 @@ export default function App() {
                 resumoMes={financas.resumoMes}
                 historicoMensal={financas.historicoMensal}
                 insights={financas.insights}
+                resumoApostas={financas.resumoApostas}
                 exportarCSV={exportarCSV}
                 exportarTudoJSON={exportarTudoJSON}
               />
@@ -110,6 +113,17 @@ export default function App() {
                 adicionarInvestimento={financas.adicionarInvestimento}
                 removerInvestimento={financas.removerInvestimento}
                 atualizarInvestimento={financas.atualizarInvestimento}
+              />
+            ) : pagina === "apostas" ? (
+              <Apostas
+                refDate={refDate}
+                mudarMes={mudarMes}
+                apostasDoMes={financas.apostasDoMes}
+                resumoApostas={financas.resumoApostas}
+                adicionarAposta={financas.adicionarAposta}
+                resolverAposta={financas.resolverAposta}
+                reabrirAposta={financas.reabrirAposta}
+                removerAposta={financas.removerAposta}
               />
             ) : (
               <Metas

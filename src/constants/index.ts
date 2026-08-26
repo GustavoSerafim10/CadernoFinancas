@@ -28,7 +28,7 @@ export const MESES = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
-export type PaginaId = "dashboard" | "extrato" | "investimentos" | "metas";
+export type PaginaId = "dashboard" | "extrato" | "investimentos" | "apostas" | "metas";
 
 export interface PaginaDef {
   id: PaginaId;
@@ -40,6 +40,7 @@ export const PAGINAS: PaginaDef[] = [
   { id: "dashboard", label: "Dashboard", cor: "#20303F" },
   { id: "extrato", label: "Extrato", cor: "#A8462B" },
   { id: "investimentos", label: "Investimentos", cor: "#2E7D5E" },
+  { id: "apostas", label: "Apostas", cor: "#7A3E5E" },
   { id: "metas", label: "Metas", cor: "#B8862B" },
 ];
 

@@ -1,7 +1,7 @@
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-import { ResumoMes, PontoHistorico, Insight } from "../types";
+import { ResumoMes, PontoHistorico, Insight, ResumoApostas } from "../types";
 import { MESES, catLabel } from "../constants";
 import { formatarMoeda, formatarPct } from "../utils/format";
 import { SeletorMes } from "../components/SeletorMes";
@@ -13,11 +13,12 @@ interface Props {
   resumoMes: ResumoMes;
   historicoMensal: PontoHistorico[];
   insights: Insight[];
+  resumoApostas: ResumoApostas;
   exportarCSV: () => void;
   exportarTudoJSON: () => void;
 }
 
-export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insights, exportarCSV, exportarTudoJSON }: Props) {
+export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insights, resumoApostas, exportarCSV, exportarTudoJSON }: Props) {
   const maxCat = Math.max(1, ...resumoMes.porCategoria.map((c) => c.total));
 
   const historicoComLabel = historicoMensal.map((h) => {
@@ -70,6 +71,18 @@ export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insig
             <div style={rotuloCampo}>investido</div>
             <div className="cf-num" style={{ fontSize: 19, fontWeight: 600, color: "var(--verde)" }}>{formatarMoeda(resumoMes.investido)}</div>
           </div>
+          {resumoApostas.apostado > 0 && (
+            <div>
+              <div style={rotuloCampo}>apostas</div>
+              <div
+                className="cf-num"
+                style={{ fontSize: 19, fontWeight: 600, color: resumoApostas.lucro >= 0 ? "var(--verde)" : "var(--rust)" }}
+              >
+                {resumoApostas.lucro >= 0 ? "+" : ""}
+                {formatarMoeda(resumoApostas.lucro)}
+              </div>
+            </div>
+          )}
           <div>
             <div style={rotuloCampo}>saldo livre</div>
             <div className="cf-num" style={{ fontSize: 19, fontWeight: 700, color: resumoMes.saldo < 0 ? "var(--rust)" : "var(--ink)" }}>
@@ -92,6 +105,9 @@ export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insig
             <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <span style={{ width: 12, height: 1.5, background: "var(--ink)", display: "inline-block" }} />receita
             </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <span style={{ width: 12, height: 1.5, background: "#7A3E5E", display: "inline-block" }} />apostas
+            </span>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <ComposedChart data={historicoComLabel} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
@@ -105,6 +121,7 @@ export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insig
               <Bar dataKey="gastos" name="Gastos" fill="#A8462B" radius={[3, 3, 0, 0]} barSize={14} />
               <Bar dataKey="investido" name="Investido" fill="#2E7D5E" radius={[3, 3, 0, 0]} barSize={14} />
               <Line dataKey="receita" name="Receita" stroke="#20303F" strokeWidth={1.75} strokeDasharray="4 3" dot={{ r: 3, fill: "#20303F" }} />
+              <Line dataKey="lucroApostas" name="Apostas" stroke="#7A3E5E" strokeWidth={1.75} dot={{ r: 3, fill: "#7A3E5E" }} />
             </ComposedChart>
           </ResponsiveContainer>
         </section>

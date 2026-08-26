@@ -1,9 +1,10 @@
 # Caderno Financeiro
 
 Controle financeiro pessoal completo: lançamentos, contas/cartões, transações
-recorrentes, metas por categoria, carteira de investimentos com rentabilidade
-e insights automáticos de gasto. Interface com identidade visual própria,
-inspirada em um caderno de anotações.
+recorrentes, metas por categoria, carteira de investimentos com rentabilidade,
+apostas esportivas (com lucro/prejuízo entrando no saldo geral) e insights
+automáticos de gasto. Interface com identidade visual própria, inspirada em
+um caderno de anotações.
 
 ## Rodando localmente
 
@@ -31,7 +32,7 @@ src/
   services/       persistência (hoje: localStorage)
   hooks/          useFinancas — toda a lógica de dados e ações do app
   components/     Nav, SeletorMes, ícones, estilos compartilhados
-  pages/          Dashboard, Extrato, Investimentos, Metas
+  pages/          Dashboard, Extrato, Investimentos, Apostas, Metas
   App.tsx         junta navegação + hook + página ativa
   main.tsx        ponto de entrada do React
 ```

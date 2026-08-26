@@ -39,6 +39,27 @@ export interface Investimento {
 
 export type Metas = Record<string, number>;
 
+export type ResultadoAposta = "pendente" | "ganhou" | "perdeu";
+
+export interface Aposta {
+  id: string;
+  descricao: string;
+  valorApostado: number;
+  resultado: ResultadoAposta;
+  retorno: number;
+  data: string; // ISO 8601
+}
+
+export interface ResumoApostas {
+  apostado: number;
+  retorno: number;
+  lucro: number;
+  ganhas: number;
+  perdidas: number;
+  pendentes: number;
+  taxaAcerto: number;
+}
+
 export interface ResumoMes {
   receita: number;
   gastos: number;
@@ -52,6 +73,7 @@ export interface PontoHistorico {
   receita: number;
   gastos: number;
   investido: number;
+  lucroApostas: number;
 }
 
 export interface Insight {
