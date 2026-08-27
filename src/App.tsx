@@ -65,6 +65,9 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <div className="cosmic-foto" />
+      <div className="cosmic-tint" />
+      <div className="cosmic-vinheta" />
       <CosmicBackground />
       <div className="conteudo">
         <header className="cabecalho">

@@ -50,7 +50,7 @@ export function Metas({ metas, setMetaCategoria, resumoMes, refDate }: Props) {
           const progresso = limite > 0 ? Math.min(100, (gasto / limite) * 100) : 0;
           const corBarra = progresso >= 100 ? "var(--rust)" : progresso >= 70 ? "var(--ouro)" : "var(--verde)";
           return (
-            <div key={c.id}>
+            <div key={c.id} style={{ background: "rgba(10, 10, 15, 0.42)", borderRadius: 8, padding: "12px 14px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                 <span style={{ fontSize: 14, fontWeight: 600 }}>{c.label}</span>
                 <span className="cf-num" style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>

@@ -43,58 +43,64 @@ body {
 
 .app-shell {
   background: var(--bg);
-  background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: 26px 26px;
   min-height: 100vh;
   position: relative;
   overflow: hidden;
 }
 
-.app-shell::before,
-.app-shell::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
+.cosmic-foto {
+  position: fixed;
+  inset: -2% -2%;
   z-index: 0;
-  opacity: 0.85;
-}
-.app-shell::before {
-  top: -240px;
-  left: -200px;
-  width: 720px;
-  height: 720px;
-  filter: blur(110px);
-  background: radial-gradient(
-    circle at 30% 30%,
-    rgba(124, 108, 246, 0.55),
-    rgba(192, 132, 252, 0.28) 45%,
-    transparent 72%
-  );
-  animation: nebulaFlutuar 26s ease-in-out infinite;
-}
-.app-shell::after {
-  bottom: -260px;
-  right: -200px;
-  width: 640px;
-  height: 640px;
-  filter: blur(110px);
-  background: radial-gradient(
-    circle at 60% 40%,
-    rgba(45, 212, 191, 0.4),
-    rgba(53, 208, 127, 0.2) 45%,
-    transparent 72%
-  );
-  animation: nebulaFlutuar 32s ease-in-out infinite reverse;
+  background-image: url('/img/cosmic-bg.jpg');
+  background-size: cover;
+  background-position: center 38%;
+  filter: saturate(0.65) brightness(0.62) contrast(1.15);
+  animation: cosmicFotoFlutuar 50s ease-in-out infinite;
 }
 
-@keyframes nebulaFlutuar {
+.cosmic-tint {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(124, 108, 246, 0.72) 0%,
+    rgba(124, 108, 246, 0.5) 45%,
+    rgba(45, 212, 191, 0.38) 78%,
+    rgba(10, 10, 15, 0.35) 100%
+  );
+  mix-blend-mode: color;
+  pointer-events: none;
+}
+
+.cosmic-vinheta {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 75% 65% at 32% 24%,
+    rgba(10, 10, 15, 0.88),
+    rgba(10, 10, 15, 0.55) 48%,
+    rgba(10, 10, 15, 0.22) 82%,
+    rgba(10, 10, 15, 0.15) 100%
+  );
+  pointer-events: none;
+}
+
+@keyframes cosmicFotoFlutuar {
   0%,
   100% {
-    transform: translate(0, 0) scale(1);
+    transform: scale(1) translate(0, 0);
   }
   50% {
-    transform: translate(30px, -24px) scale(1.08);
+    transform: scale(1.06) translate(-1%, -1%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cosmic-foto {
+    animation: none !important;
   }
 }
 
@@ -142,6 +148,15 @@ body {
 .cf-num {
   font-family: 'JetBrains Mono', monospace;
   font-variant-numeric: tabular-nums;
+}
+
+.cf-linha {
+  background: rgba(10, 10, 15, 0.42);
+  border-radius: 6px;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  margin-left: -10px;
+  margin-right: -10px;
 }
 
 .cf-btn {
