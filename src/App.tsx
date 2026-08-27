@@ -1,6 +1,7 @@
 import { useState, Suspense, lazy } from "react";
 import { Nav } from "./components/Nav";
 import { CosmicBackground } from "./components/CosmicBackground";
+import { FinanceHud } from "./components/FinanceHud";
 import { useFinancas } from "./hooks/useFinancas";
 import { chaveDoMes } from "./utils/date";
 import { PaginaId } from "./constants";
@@ -69,6 +70,7 @@ export default function App() {
       <div className="cosmic-tint" />
       <div className="cosmic-vinheta" />
       <CosmicBackground />
+      <FinanceHud />
       <div className="conteudo">
         <header className="cabecalho">
           <div className="eyebrow">Nightfolio</div>

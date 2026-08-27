@@ -102,9 +102,10 @@ export function CosmicBackground() {
     let particulas: Particula[] = [];
     let meteoros: Meteoro[] = [];
     let proximoMeteoro = tempoAleatorio(4, 11);
-    let proximoEvento = tempoAleatorio(28, 55);
+    let proximoEvento = tempoAleatorio(20, 40);
     const naveSolo: NaveSolo = { ativa: false, tipo: "foguete", x: 0, y: 0, vx: 0, angulo: 0, vida: 0, vidaMax: 1 };
-    let batalha: Batalha | null = null;
+    let batalhas: Batalha[] = [];
+    const MAX_BATALHAS = 3;
 
     const mouse = { x: 0, y: 0 };
     const parallax = { x: 0, y: 0 };
@@ -297,8 +298,29 @@ export function CosmicBackground() {
     function desenharSilhuetaNave(tipo: TipoNave, escala: number) {
       ctx!.save();
       ctx!.scale(escala, escala);
+      ctx!.shadowBlur = 14;
+      ctx!.shadowColor = `rgba(${COR_ACCENT}, 0.85)`;
+
+      const pontaX = tipo === "disco" ? 20 : tipo === "caca" ? 21 : 20;
+      const brilhoPonta = ctx!.createRadialGradient(pontaX, 0, 0, pontaX, 0, 9);
+      brilhoPonta.addColorStop(0, "rgba(255, 255, 255, 0.9)");
+      brilhoPonta.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx!.fillStyle = brilhoPonta;
+      ctx!.beginPath();
+      ctx!.arc(pontaX, 0, 9, 0, Math.PI * 2);
+      ctx!.fill();
 
       if (tipo === "disco") {
+        const rastroDisco = ctx!.createLinearGradient(-38, 0, -14, 0);
+        rastroDisco.addColorStop(0, `rgba(${COR_ACCENT}, 0)`);
+        rastroDisco.addColorStop(1, `rgba(${COR_ACCENT}, 0.5)`);
+        ctx!.strokeStyle = rastroDisco;
+        ctx!.lineWidth = 1;
+        ctx!.beginPath();
+        ctx!.moveTo(-38, 1);
+        ctx!.lineTo(-14, 1);
+        ctx!.stroke();
+
         ctx!.beginPath();
         ctx!.ellipse(0, 3, 15, 3.4, 0, 0, Math.PI * 2);
         ctx!.strokeStyle = `rgba(${COR_ACCENT}, 0.55)`;
@@ -315,17 +337,24 @@ export function CosmicBackground() {
         ctx!.fillStyle = `rgba(${COR_ACCENT}, 0.55)`;
         ctx!.fill();
       } else if (tipo === "caca") {
-        const rastro = ctx!.createLinearGradient(-22, 0, -6, 0);
+        const rastro = ctx!.createLinearGradient(-42, 0, -6, 0);
         rastro.addColorStop(0, `rgba(${COR_ACCENT}, 0)`);
         rastro.addColorStop(1, `rgba(${COR_ACCENT}, 0.6)`);
         ctx!.fillStyle = rastro;
         ctx!.beginPath();
-        ctx!.moveTo(-22, -2);
+        ctx!.moveTo(-42, -1.6);
         ctx!.lineTo(-6, -1.2);
         ctx!.lineTo(-6, 1.2);
-        ctx!.lineTo(-22, 2);
+        ctx!.lineTo(-42, 1.6);
         ctx!.closePath();
         ctx!.fill();
+
+        ctx!.strokeStyle = `rgba(${COR_ESTRELA}, 0.7)`;
+        ctx!.lineWidth = 0.8;
+        ctx!.beginPath();
+        ctx!.moveTo(-42, 0);
+        ctx!.lineTo(-6, 0);
+        ctx!.stroke();
 
         // silhueta delta solida (tipo stealth), nao pontas finas
         ctx!.fillStyle = `rgba(${COR_ESTRELA}, 0.85)`;
@@ -340,16 +369,23 @@ export function CosmicBackground() {
         ctx!.closePath();
         ctx!.fill();
       } else {
-        const rastro = ctx!.createLinearGradient(-30, 0, -5, 0);
+        const rastro = ctx!.createLinearGradient(-55, 0, -5, 0);
         rastro.addColorStop(0, `rgba(${COR_ACCENT}, 0)`);
         rastro.addColorStop(1, `rgba(${COR_ACCENT}, 0.6)`);
         ctx!.fillStyle = rastro;
         ctx!.beginPath();
-        ctx!.moveTo(-30, 0);
+        ctx!.moveTo(-55, 0);
         ctx!.lineTo(-5, -4);
         ctx!.lineTo(-5, 4);
         ctx!.closePath();
         ctx!.fill();
+
+        ctx!.strokeStyle = `rgba(${COR_ESTRELA}, 0.75)`;
+        ctx!.lineWidth = 1;
+        ctx!.beginPath();
+        ctx!.moveTo(-55, 0);
+        ctx!.lineTo(-6, 0);
+        ctx!.stroke();
 
         ctx!.fillStyle = `rgba(${COR_ESTRELA}, 0.85)`;
         ctx!.beginPath();
@@ -364,18 +400,15 @@ export function CosmicBackground() {
       ctx!.restore();
     }
 
-    function eventoEspacialAtivo() {
-      return naveSolo.ativa || batalha !== null;
-    }
-
     function talvezIniciarEvento(dt: number) {
-      if (eventoEspacialAtivo()) return;
       proximoEvento -= dt;
       if (proximoEvento > 0) return;
-      proximoEvento = tempoAleatorio(28, 55);
-      if (Math.random() < 0.4) {
+      proximoEvento = tempoAleatorio(20, 40);
+      const podeBatalha = batalhas.length < MAX_BATALHAS;
+      const podeSolo = !naveSolo.ativa;
+      if (podeBatalha && (Math.random() < 0.55 || !podeSolo)) {
         iniciarBatalha();
-      } else {
+      } else if (podeSolo) {
         iniciarNaveSolo();
       }
     }
@@ -413,9 +446,15 @@ export function CosmicBackground() {
     }
 
     function iniciarBatalha() {
-      const y = altura * (0.22 + Math.random() * 0.4);
+      // escolhe uma faixa vertical livre, evitando sobrepor batalhas ja em curso
+      let y = altura * (0.2 + Math.random() * 0.45);
+      for (let tentativa = 0; tentativa < 6; tentativa++) {
+        const emUso = batalhas.some((b) => Math.abs(b.a.y - y) < 120);
+        if (!emUso) break;
+        y = altura * (0.2 + Math.random() * 0.45);
+      }
       const velocidade = 80 + Math.random() * 30;
-      batalha = {
+      batalhas.push({
         fase: "aproximando",
         a: { tipo: tipoAleatorio(), x: -90, y, vx: velocidade, viva: true },
         b: { tipo: tipoAleatorio(), x: largura + 90, y: y + (Math.random() - 0.5) * 70, vx: -velocidade, viva: true },
@@ -423,12 +462,14 @@ export function CosmicBackground() {
         tiro: null,
         atrasoTiro: 0,
         explosao: null,
-      };
+      });
     }
 
-    function atualizarEDesenharBatalha(dt: number) {
-      if (!batalha) return;
-      const b = batalha;
+    function atualizarEDesenharBatalhas(dt: number) {
+      batalhas = batalhas.filter((b) => atualizarEDesenharUmaBatalha(b, dt));
+    }
+
+    function atualizarEDesenharUmaBatalha(b: Batalha, dt: number): boolean {
       const combatentes: [Combatente, Combatente] = [b.a, b.b];
       const vencedor = combatentes[b.vencedorIdx];
       const perdedor = combatentes[b.vencedorIdx === 0 ? 1 : 0];
@@ -484,8 +525,7 @@ export function CosmicBackground() {
       } else if (b.fase === "encerrando") {
         vencedor.x += vencedor.vx * dt;
         if (vencedor.x < -120 || vencedor.x > largura + 120) {
-          batalha = null;
-          return;
+          return false;
         }
       }
 
@@ -542,6 +582,8 @@ export function CosmicBackground() {
           ctx!.fill();
         }
       }
+
+      return true;
     }
 
     let raf = 0;
@@ -574,7 +616,7 @@ export function CosmicBackground() {
 
       talvezIniciarEvento(dt);
       atualizarEDesenharNaveSolo(dt);
-      atualizarEDesenharBatalha(dt);
+      atualizarEDesenharBatalhas(dt);
 
       raf = requestAnimationFrame(desenhar);
     }
