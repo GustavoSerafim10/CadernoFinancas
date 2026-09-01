@@ -90,6 +90,7 @@ export default function App() {
                 resumoMes={financas.resumoMes}
                 resumoMesAnterior={financas.resumoMesAnterior}
                 historicoMensal={financas.historicoMensal}
+                transacoesDoMes={financas.transacoesDoMes}
                 insights={financas.insights}
                 resumoApostas={financas.resumoApostas}
                 exportarCSV={exportarCSV}
