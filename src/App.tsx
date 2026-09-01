@@ -1,5 +1,5 @@
 import { useState, Suspense, lazy } from "react";
-import { Nav } from "./components/Nav";
+import { Sidebar } from "./components/Sidebar";
 import { CosmicBackground } from "./components/CosmicBackground";
 import { FinanceHud } from "./components/FinanceHud";
 import { useFinancas } from "./hooks/useFinancas";
@@ -71,13 +71,11 @@ export default function App() {
       <div className="cosmic-vinheta" />
       <CosmicBackground />
       <FinanceHud />
+      <Sidebar pagina={pagina} setPagina={setPagina} />
       <div className="conteudo">
         <header className="cabecalho">
-          <div className="eyebrow">Nightfolio</div>
           <h1>Clareza total sobre suas finanças.</h1>
         </header>
-
-        <Nav pagina={pagina} setPagina={setPagina} />
 
         {financas.erro && <div className="erro">{financas.erro}</div>}
 

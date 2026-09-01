@@ -105,9 +105,9 @@ body {
 }
 
 .conteudo {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 36px clamp(18px, 5vw, 52px) 64px;
+  padding: 36px clamp(18px, 5vw, 52px) 64px calc(76px + clamp(18px, 5vw, 52px));
   position: relative;
   z-index: 1;
 }
