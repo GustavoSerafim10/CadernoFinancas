@@ -91,6 +91,40 @@ export function IconeSimulador() {
   );
 }
 
+export function IconeCarteira() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M3 5.5C3 4.67 3.67 4 4.5 4H13a1 1 0 0 1 1 1v1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="2.5" y="6" width="13" height="8.5" rx="1.8" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="12.2" cy="10.2" r="1.1" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function IconeCartao() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <rect x="2" y="4" width="14" height="10" rx="1.8" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M2 7.5H16" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M4.5 11.2H8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconeSaldo() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <circle cx="9" cy="9" r="6.5" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M9 6v6M11 7.3c0-.9-.9-1.5-2-1.5s-2 .6-2 1.4c0 .9.9 1.2 2 1.4s2 .5 2 1.4c0 .8-.9 1.4-2 1.4s-2-.6-2-1.5"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function IconeMetas() {
   return (
     <svg width="19" height="19" viewBox="0 0 19 19" fill="none">

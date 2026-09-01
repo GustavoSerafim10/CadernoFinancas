@@ -12,9 +12,20 @@ import {
   ResumoApostas,
 } from "../types";
 import { getItem, setItem } from "../services/storage";
-import { gerarId, diasNoMes } from "../utils/date";
+import { gerarId, diasNoMes, mesesAnteriores } from "../utils/date";
 import { CATEGORIAS } from "../constants";
 import { calcularInsights } from "../utils/insights";
+
+function montarResumo(doMes: Transacao[], lucroApostasDoMes: number): ResumoMes {
+  const receita = doMes.filter((t) => t.tipo === "receita").reduce((s, t) => s + t.valor, 0);
+  const gastos = doMes.filter((t) => t.tipo === "gasto").reduce((s, t) => s + t.valor, 0);
+  const investido = doMes.filter((t) => t.tipo === "investimento").reduce((s, t) => s + t.valor, 0);
+  const porCategoria = CATEGORIAS.map((c) => ({
+    ...c,
+    total: doMes.filter((t) => t.tipo === "gasto" && t.categoria === c.id).reduce((s, t) => s + t.valor, 0),
+  })).filter((c) => c.total > 0);
+  return { receita, gastos, investido, saldo: receita - gastos - investido + lucroApostasDoMes, porCategoria };
+}
 
 export function useFinancas(monthKey: string) {
   const [contas, setContas] = useState<Conta[]>([]);
@@ -229,21 +240,33 @@ export function useFinancas(monthKey: string) {
     return { apostado, retorno, lucro, ganhas, perdidas, pendentes, taxaAcerto };
   }, [apostasDoMes]);
 
-  const resumoMes: ResumoMes = useMemo(() => {
-    const receita = transacoesDoMes.filter((t) => t.tipo === "receita").reduce((s, t) => s + t.valor, 0);
-    const gastos = transacoesDoMes.filter((t) => t.tipo === "gasto").reduce((s, t) => s + t.valor, 0);
-    const investido = transacoesDoMes.filter((t) => t.tipo === "investimento").reduce((s, t) => s + t.valor, 0);
-    const porCategoria = CATEGORIAS.map((c) => ({
-      ...c,
-      total: transacoesDoMes
-        .filter((t) => t.tipo === "gasto" && t.categoria === c.id)
-        .reduce((s, t) => s + t.valor, 0),
-    })).filter((c) => c.total > 0);
-    return { receita, gastos, investido, saldo: receita - gastos - investido + resumoApostas.lucro, porCategoria };
-  }, [transacoesDoMes, resumoApostas.lucro]);
+  const resumoMes: ResumoMes = useMemo(
+    () => montarResumo(transacoesDoMes, resumoApostas.lucro),
+    [transacoesDoMes, resumoApostas.lucro]
+  );
+
+  const mesAnteriorKey = useMemo(() => mesesAnteriores(monthKey, 1)[0], [monthKey]);
+
+  const transacoesMesAnterior = useMemo(
+    () => transacoes.filter((t) => t.data.startsWith(mesAnteriorKey)),
+    [transacoes, mesAnteriorKey]
+  );
+
+  const lucroApostasMesAnterior = useMemo(
+    () =>
+      apostas
+        .filter((a) => a.data.startsWith(mesAnteriorKey))
+        .reduce((s, a) => s + lucroAposta(a), 0),
+    [apostas, mesAnteriorKey]
+  );
+
+  const resumoMesAnterior: ResumoMes = useMemo(
+    () => montarResumo(transacoesMesAnterior, lucroApostasMesAnterior),
+    [transacoesMesAnterior, lucroApostasMesAnterior]
+  );
 
   const historicoMensal: PontoHistorico[] = useMemo(() => {
-    const chaves = Array.from(new Set(transacoes.map((t) => t.data.slice(0, 7)))).sort().slice(-6);
+    const chaves = Array.from(new Set(transacoes.map((t) => t.data.slice(0, 7)))).sort().slice(-12);
     return chaves.map((mk) => {
       const doMes = transacoes.filter((t) => t.data.startsWith(mk));
       const apostasMes = apostas.filter((a) => a.data.startsWith(mk));
@@ -261,7 +284,7 @@ export function useFinancas(monthKey: string) {
 
   return {
     contas, transacoes, recorrencias, metas, investimentos, apostas, carregando, erro,
-    transacoesDoMes, resumoMes, historicoMensal, insights,
+    transacoesDoMes, resumoMes, resumoMesAnterior, historicoMensal, insights,
     apostasDoMes, resumoApostas,
     adicionarTransacao, removerTransacao, editarTransacao,
     adicionarConta, removerConta,

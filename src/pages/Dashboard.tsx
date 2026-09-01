@@ -6,17 +6,19 @@ import { ResumoMes, PontoHistorico, Insight, ResumoApostas } from "../types";
 import { MESES, catLabel } from "../constants";
 import { formatarMoeda, formatarPct } from "../utils/format";
 import { SeletorMes } from "../components/SeletorMes";
-import { NumeroAnimado } from "../components/NumeroAnimado";
+import { KpiCard } from "../components/KpiCard";
+import { IconeCarteira, IconeCartao, IconeInvestimentos, IconeApostas, IconeSaldo } from "../components/Icones";
 import { rotuloCampo, cartaoEstilo, linkDiscreto } from "../components/estilosComuns";
 import {
   CHART_GRID, CHART_AXIS_TEXT, CHART_AXIS_LINE, CHART_TOOLTIP_STYLE,
-  COR_GASTOS, COR_INVESTIDO, COR_RECEITA, COR_APOSTAS,
+  COR_GASTOS, COR_INVESTIDO, COR_RECEITA, COR_APOSTAS, COR_ACCENT,
 } from "../components/chartTheme";
 
 interface Props {
   refDate: Date;
   mudarMes: (delta: number) => void;
   resumoMes: ResumoMes;
+  resumoMesAnterior: ResumoMes;
   historicoMensal: PontoHistorico[];
   insights: Insight[];
   resumoApostas: ResumoApostas;
@@ -24,13 +26,21 @@ interface Props {
   exportarTudoJSON: () => void;
 }
 
-export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insights, resumoApostas, exportarCSV, exportarTudoJSON }: Props) {
+export function Dashboard({
+  refDate, mudarMes, resumoMes, resumoMesAnterior, historicoMensal, insights, resumoApostas, exportarCSV, exportarTudoJSON,
+}: Props) {
   const maxCat = Math.max(1, ...resumoMes.porCategoria.map((c) => c.total));
 
   const historicoComLabel = historicoMensal.map((h) => {
     const [ano, mes] = h.chave.split("-");
     return { ...h, label: `${MESES[parseInt(mes, 10) - 1]?.slice(0, 3) || mes}/${ano.slice(2)}` };
   });
+
+  const serieReceita = historicoMensal.map((h) => h.receita);
+  const serieGastos = historicoMensal.map((h) => h.gastos);
+  const serieInvestido = historicoMensal.map((h) => h.investido);
+  const serieApostas = historicoMensal.map((h) => h.lucroApostas);
+  const serieSaldo = historicoMensal.map((h) => h.receita - h.gastos - h.investido + h.lucroApostas);
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
@@ -62,42 +72,60 @@ export function Dashboard({ refDate, mudarMes, resumoMes, historicoMensal, insig
         </section>
       )}
 
-      <section className="cf-card" style={{ ...cartaoEstilo, marginBottom: 32 }}>
-        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 15, marginBottom: 16 }}>resumo do mês</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 16 }}>
-          <div>
-            <div style={rotuloCampo}>receita</div>
-            <NumeroAnimado valor={resumoMes.receita} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600 }} />
-          </div>
-          <div>
-            <div style={rotuloCampo}>gastos</div>
-            <NumeroAnimado valor={resumoMes.gastos} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600, color: "var(--rust)" }} />
-          </div>
-          <div>
-            <div style={rotuloCampo}>investido</div>
-            <NumeroAnimado valor={resumoMes.investido} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600, color: "var(--verde)" }} />
-          </div>
-          {resumoApostas.apostado > 0 && (
-            <div>
-              <div style={rotuloCampo}>apostas</div>
-              <NumeroAnimado
-                valor={resumoApostas.lucro}
-                formatar={(v) => `${v >= 0 ? "+" : ""}${formatarMoeda(v)}`}
-                className="cf-num"
-                style={{ fontSize: 19, fontWeight: 600, color: resumoApostas.lucro >= 0 ? "var(--verde)" : "var(--rust)" }}
-              />
-            </div>
-          )}
-          <div>
-            <div style={rotuloCampo}>saldo livre</div>
-            <NumeroAnimado
-              valor={resumoMes.saldo}
-              formatar={formatarMoeda}
-              className="cf-num"
-              style={{ fontSize: 19, fontWeight: 700, color: resumoMes.saldo < 0 ? "var(--rust)" : "var(--ink)" }}
-            />
-          </div>
-        </div>
+      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 32 }}>
+        <KpiCard
+          icone={<IconeCarteira />}
+          label="receita"
+          valor={resumoMes.receita}
+          valorAnterior={resumoMesAnterior.receita}
+          formatar={formatarMoeda}
+          serieMensal={serieReceita}
+          corIcone={COR_RECEITA}
+          corSpark={COR_RECEITA}
+        />
+        <KpiCard
+          icone={<IconeCartao />}
+          label="gastos"
+          valor={resumoMes.gastos}
+          valorAnterior={resumoMesAnterior.gastos}
+          formatar={formatarMoeda}
+          serieMensal={serieGastos}
+          corIcone={COR_GASTOS}
+          corSpark={COR_GASTOS}
+          direcaoBoa="baixa"
+        />
+        <KpiCard
+          icone={<IconeInvestimentos />}
+          label="investido"
+          valor={resumoMes.investido}
+          valorAnterior={resumoMesAnterior.investido}
+          formatar={formatarMoeda}
+          serieMensal={serieInvestido}
+          corIcone={COR_INVESTIDO}
+          corSpark={COR_INVESTIDO}
+        />
+        {resumoApostas.apostado > 0 && (
+          <KpiCard
+            icone={<IconeApostas />}
+            label="apostas"
+            valor={resumoApostas.lucro}
+            valorAnterior={serieApostas[serieApostas.length - 2] ?? 0}
+            formatar={(v) => `${v >= 0 ? "+" : ""}${formatarMoeda(v)}`}
+            serieMensal={serieApostas}
+            corIcone={COR_APOSTAS}
+            corSpark={COR_APOSTAS}
+          />
+        )}
+        <KpiCard
+          icone={<IconeSaldo />}
+          label="saldo livre"
+          valor={resumoMes.saldo}
+          valorAnterior={resumoMesAnterior.saldo}
+          formatar={formatarMoeda}
+          serieMensal={serieSaldo}
+          corIcone={COR_ACCENT}
+          corSpark={COR_ACCENT}
+        />
       </section>
 
       {historicoComLabel.length > 1 && (

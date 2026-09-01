@@ -88,6 +88,7 @@ export default function App() {
                 refDate={refDate}
                 mudarMes={mudarMes}
                 resumoMes={financas.resumoMes}
+                resumoMesAnterior={financas.resumoMesAnterior}
                 historicoMensal={financas.historicoMensal}
                 insights={financas.insights}
                 resumoApostas={financas.resumoApostas}
