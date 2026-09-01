@@ -14,6 +14,13 @@ export const CHART_TOOLTIP_STYLE: CSSProperties = {
   color: "#F4F4F8",
 };
 
+// Recharts renderiza cada item do tooltip com a cor da propria serie/fatia
+// (as vezes cai pra um preto padrao, ilegivel em fundo escuro — sobretudo
+// em PieChart, onde cada fatia e um Cell em vez de uma serie nomeada).
+// contentStyle sozinho nao cobre isso; precisa forcar itemStyle/labelStyle.
+export const CHART_TOOLTIP_ITEM_STYLE: CSSProperties = { color: "#F4F4F8" };
+export const CHART_TOOLTIP_LABEL_STYLE: CSSProperties = { color: "#9A99AE", marginBottom: 4 };
+
 export const COR_RECEITA = "#F4F4F8";
 export const COR_GASTOS = "#F2586B";
 export const COR_INVESTIDO = "#35D07F";

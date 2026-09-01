@@ -1,5 +1,6 @@
 import { useState, Suspense, lazy } from "react";
 import { Sidebar } from "./components/Sidebar";
+import { IconeSino } from "./components/Icones";
 import { CosmicBackground } from "./components/CosmicBackground";
 import { FinanceHud } from "./components/FinanceHud";
 import { useFinancas } from "./hooks/useFinancas";
@@ -74,7 +75,20 @@ export default function App() {
       <Sidebar pagina={pagina} setPagina={setPagina} />
       <div className="conteudo">
         <header className="cabecalho">
-          <h1>Clareza total sobre suas finanças.</h1>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <div className="eyebrow">Nightfolio</div>
+              <h1>Clareza total sobre suas finanças.</h1>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span className="cf-icone-decorativo" title="Notificações">
+                <IconeSino />
+              </span>
+              <span className="cf-avatar" title="Gustavo Vinicius">
+                GV
+              </span>
+            </div>
+          </div>
         </header>
 
         {financas.erro && <div className="erro">{financas.erro}</div>}
@@ -95,6 +109,7 @@ export default function App() {
                 resumoApostas={financas.resumoApostas}
                 exportarCSV={exportarCSV}
                 exportarTudoJSON={exportarTudoJSON}
+                setPagina={setPagina}
               />
             ) : pagina === "extrato" ? (
               <Extrato

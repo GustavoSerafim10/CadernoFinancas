@@ -134,6 +134,65 @@ body {
   margin-bottom: 26px;
 }
 
+.cf-icone-decorativo {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface-glass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  flex: 0 0 auto;
+}
+
+.cf-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent), var(--verde));
+  color: #0a0a0f;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  flex: 0 0 auto;
+}
+
+.cf-pill-decorativo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink-soft);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.cf-link-mais {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--accent-hover);
+  font-weight: 500;
+}
+.cf-link-mais:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .erro {
   margin-bottom: 20px;
   font-size: 13px;

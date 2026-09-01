@@ -7,7 +7,10 @@ import { formatarMoeda, formatarPct, parseMoeda } from "../utils/format";
 import { IconeX, IconeEditar } from "../components/Icones";
 import { NumeroAnimado } from "../components/NumeroAnimado";
 import { rotuloCampo, campoInput, cartaoEstilo, botaoPrimario, botaoGhost, linkDiscreto } from "../components/estilosComuns";
-import { CHART_STROKE_SEPARATOR, CHART_TOOLTIP_STYLE, CORES_TIPO_INVESTIMENTO } from "../components/chartTheme";
+import {
+  CHART_STROKE_SEPARATOR, CHART_TOOLTIP_STYLE, CHART_TOOLTIP_ITEM_STYLE, CHART_TOOLTIP_LABEL_STYLE,
+  CORES_TIPO_INVESTIMENTO,
+} from "../components/chartTheme";
 
 interface Props {
   investimentos: Investimento[];
@@ -126,7 +129,7 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                     <Pie data={totais.porTipo} dataKey="valor" nameKey="tipo" innerRadius={50} outerRadius={90} paddingAngle={2}>
                       {totais.porTipo.map((t, i) => <Cell key={i} fill={t.cor} stroke={CHART_STROKE_SEPARATOR} strokeWidth={2} />)}
                     </Pie>
-                    <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} />
+                    <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>

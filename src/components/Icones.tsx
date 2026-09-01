@@ -144,6 +144,30 @@ export function IconeCalendario() {
   );
 }
 
+export function IconeSino() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
+      <path
+        d="M8.5 2.5C6.6 2.5 5 4.1 5 6v2.3c0 .5-.2 1-.6 1.4l-.9.9c-.5.5-.1 1.4.6 1.4h9c.7 0 1.1-.9.6-1.4l-.9-.9c-.4-.4-.6-.9-.6-1.4V6c0-1.9-1.6-3.5-3.7-3.5Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path d="M7.2 13.5a1.5 1.5 0 0 0 2.6 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconeMenuPontos() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="7" cy="2.6" r="1.15" fill="currentColor" />
+      <circle cx="7" cy="7" r="1.15" fill="currentColor" />
+      <circle cx="7" cy="11.4" r="1.15" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function IconeMetas() {
   return (
     <svg width="19" height="19" viewBox="0 0 19 19" fill="none">

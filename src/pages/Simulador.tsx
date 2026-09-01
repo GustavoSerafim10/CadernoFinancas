@@ -5,7 +5,10 @@ import { formatarMoeda, parseMoeda } from "../utils/format";
 import { simular, MAX_MESES } from "../wasm/engine";
 import { NumeroAnimado } from "../components/NumeroAnimado";
 import { rotuloCampo, campoInput, cartaoEstilo, botaoPrimario, badgeEstilo } from "../components/estilosComuns";
-import { CHART_GRID, CHART_AXIS_TEXT, CHART_AXIS_LINE, CHART_TOOLTIP_STYLE, COR_ACCENT } from "../components/chartTheme";
+import {
+  CHART_GRID, CHART_AXIS_TEXT, CHART_AXIS_LINE, CHART_TOOLTIP_STYLE, CHART_TOOLTIP_ITEM_STYLE,
+  CHART_TOOLTIP_LABEL_STYLE, COR_ACCENT,
+} from "../components/chartTheme";
 
 interface Resultado {
   saldos: number[];
@@ -145,6 +148,8 @@ export function Simulador() {
                   formatter={(v: number) => formatarMoeda(v)}
                   labelFormatter={(v) => `mês ${v}`}
                   contentStyle={CHART_TOOLTIP_STYLE}
+                  itemStyle={CHART_TOOLTIP_ITEM_STYLE}
+                  labelStyle={CHART_TOOLTIP_LABEL_STYLE}
                 />
                 <Area type="monotone" dataKey="saldo" stroke={COR_ACCENT} strokeWidth={2} fill="url(#simuladorGradiente)" />
               </AreaChart>
