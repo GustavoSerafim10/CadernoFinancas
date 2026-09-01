@@ -11,6 +11,16 @@ export const CATEGORIAS: Categoria[] = [
   { id: "lazer", label: "Lazer", cor: "#34D399" },
   { id: "saude", label: "Saúde", cor: "#2DD4BF" },
   { id: "educacao", label: "Educação", cor: "#A78BFA" },
+  { id: "compras", label: "Compras", cor: "#F472B6" },
+  { id: "assinaturas", label: "Assinaturas", cor: "#818CF8" },
+  { id: "telefonia", label: "Telefonia & Internet", cor: "#38BDF8" },
+  { id: "cuidados-pessoais", label: "Cuidados pessoais", cor: "#FB923C" },
+  { id: "casa", label: "Casa", cor: "#CA8A04" },
+  { id: "impostos-taxas", label: "Impostos & Taxas", cor: "#EF4444" },
+  { id: "dividas-parcelamentos", label: "Dívidas / Parcelamentos", cor: "#B91C1C" },
+  { id: "presentes", label: "Presentes", cor: "#E879F9" },
+  { id: "viagem", label: "Viagem", cor: "#22D3EE" },
+  { id: "apostas", label: "Apostas", cor: "#C084FC" },
   { id: "outros", label: "Outros", cor: "#94A3B8" },
 ];
 
@@ -49,5 +59,5 @@ export function catLabel(id: string | null): string {
 }
 
 export function catCor(id: string | null): string {
-  return CATEGORIAS.find((c) => c.id === id)?.cor || "#7A7166";
+  return CATEGORIAS.find((c) => c.id === id)?.cor || "#94A3B8";
 }
