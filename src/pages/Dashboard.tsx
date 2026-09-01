@@ -9,7 +9,7 @@ import { MESES, catLabel } from "../constants";
 import { formatarMoeda, formatarPct } from "../utils/format";
 import { SeletorMes } from "../components/SeletorMes";
 import { KpiCard } from "../components/KpiCard";
-import { IconeCarteira, IconeCartao, IconeInvestimentos, IconeApostas, IconeSaldo } from "../components/Icones";
+import { IconeCarteira, IconeCartao, IconeInvestimentos, IconeApostas, IconeSaldo, IconeDownload } from "../components/Icones";
 import { rotuloCampo, cartaoEstilo, botaoSecundario } from "../components/estilosComuns";
 import {
   CHART_GRID, CHART_AXIS_TEXT, CHART_AXIS_LINE, CHART_TOOLTIP_STYLE, CHART_STROKE_SEPARATOR,
@@ -77,16 +77,17 @@ export function Dashboard({
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
-      <div style={{ display: "flex", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
-        <button onClick={exportarCSV} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12 }}>
-          ⬇ exportar CSV
-        </button>
-        <button onClick={exportarTudoJSON} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12 }}>
-          ⬇ exportar JSON
-        </button>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 14, marginBottom: 28 }}>
+        <SeletorMes refDate={refDate} mudarMes={mudarMes} semMargem />
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={exportarCSV} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}>
+            <IconeDownload /> Exportar CSV
+          </button>
+          <button onClick={exportarTudoJSON} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}>
+            <IconeDownload /> Exportar JSON
+          </button>
+        </div>
       </div>
-
-      <SeletorMes refDate={refDate} mudarMes={mudarMes} />
 
       {insights.length > 0 && (
         <section style={{ marginBottom: 28 }}>

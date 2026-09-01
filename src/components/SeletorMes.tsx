@@ -1,14 +1,15 @@
 import { CSSProperties } from "react";
 import { MESES } from "../constants";
-import { IconeSeta } from "./Icones";
+import { IconeSeta, IconeCalendario } from "./Icones";
 
 interface Props {
   refDate: Date;
   mudarMes: (delta: number) => void;
   corDestaque?: string;
+  semMargem?: boolean;
 }
 
-export function SeletorMes({ refDate, mudarMes, corDestaque = "var(--accent)" }: Props) {
+export function SeletorMes({ refDate, mudarMes, corDestaque = "var(--accent)", semMargem = false }: Props) {
   const botaoSeta: CSSProperties = {
     width: 32,
     height: 32,
@@ -23,7 +24,7 @@ export function SeletorMes({ refDate, mudarMes, corDestaque = "var(--accent)" }:
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: semMargem ? 0 : 28 }}>
       <button onClick={() => mudarMes(-1)} aria-label="Mês anterior" className="cf-btn cf-focus" style={botaoSeta}>
         <IconeSeta dir="left" />
       </button>
@@ -45,7 +46,9 @@ export function SeletorMes({ refDate, mudarMes, corDestaque = "var(--accent)" }:
           gap: 8,
         }}
       >
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: corDestaque, flex: "0 0 auto" }} />
+        <span style={{ display: "flex", color: corDestaque, flex: "0 0 auto" }}>
+          <IconeCalendario />
+        </span>
         {MESES[refDate.getMonth()]} · {refDate.getFullYear()}
       </div>
       <button onClick={() => mudarMes(1)} aria-label="Próximo mês" className="cf-btn cf-focus" style={botaoSeta}>

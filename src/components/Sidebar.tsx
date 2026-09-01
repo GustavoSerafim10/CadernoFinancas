@@ -67,8 +67,8 @@ export function Sidebar({ pagina, setPagina }: Props) {
             className="cf-focus"
             style={{
               position: "relative",
-              width: 44,
-              height: 44,
+              width: 48,
+              height: 48,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -93,7 +93,7 @@ export function Sidebar({ pagina, setPagina }: Props) {
                 }}
               />
             )}
-            <span style={{ position: "relative", display: "flex" }}>
+            <span style={{ position: "relative", display: "flex", transform: "scale(1.3)" }}>
               <Icone />
             </span>
           </button>
