@@ -156,6 +156,8 @@ export function Dashboard({
       .slice(0, 5);
   }, [resumoMes.porCategoria, resumoMesAnterior.porCategoria]);
 
+  const temMesAnterior = resumoMesAnterior.porCategoria.length > 0;
+
   const saldoAcumulado = useMemo(
     () =>
       historicoComLabel.map((_, i) => ({
@@ -473,9 +475,11 @@ export function Dashboard({
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_INVESTIDO, display: "inline-block" }} />este mês
                 </span>
-                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_ACCENT, display: "inline-block" }} />mês anterior
-                </span>
+                {temMesAnterior && (
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_ACCENT, display: "inline-block" }} />mês anterior
+                  </span>
+                )}
               </div>
               <ResponsiveContainer width="100%" height={Math.max(140, comparativoCategorias.length * 40)}>
                 <BarChart data={comparativoCategorias} layout="vertical" margin={{ top: 4, right: 58, left: 0, bottom: 4 }}>
@@ -486,9 +490,11 @@ export function Dashboard({
                   <Bar dataKey="atual" name="este mês" fill={COR_INVESTIDO} radius={[0, 3, 3, 0]} barSize={7}>
                     <LabelList dataKey="atual" position="right" formatter={(v: number) => formatarMoeda(v)} fill={CHART_AXIS_TEXT} fontSize={9.5} />
                   </Bar>
-                  <Bar dataKey="anterior" name="mês anterior" fill={COR_ACCENT} radius={[0, 3, 3, 0]} barSize={7}>
-                    <LabelList dataKey="anterior" position="right" formatter={(v: number) => formatarMoeda(v)} fill={CHART_AXIS_TEXT} fontSize={9.5} />
-                  </Bar>
+                  {temMesAnterior && (
+                    <Bar dataKey="anterior" name="mês anterior" fill={COR_ACCENT} radius={[0, 3, 3, 0]} barSize={7}>
+                      <LabelList dataKey="anterior" position="right" formatter={(v: number) => formatarMoeda(v)} fill={CHART_AXIS_TEXT} fontSize={9.5} />
+                    </Bar>
+                  )}
                 </BarChart>
               </ResponsiveContainer>
             </>
