@@ -1,4 +1,4 @@
-import { useMemo, CSSProperties } from "react";
+import { useMemo, CSSProperties, ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   ComposedChart, Bar, BarChart, Line, Area, AreaChart, PieChart, Pie, Cell,
@@ -14,7 +14,7 @@ import { IconeCarteira, IconeCartao, IconeInvestimentos, IconeApostas, IconeSald
 import { rotuloCampo, cartaoEstilo, botaoSecundario } from "../components/estilosComuns";
 import {
   CHART_GRID, CHART_AXIS_TEXT, CHART_AXIS_LINE, CHART_TOOLTIP_STYLE, CHART_TOOLTIP_ITEM_STYLE, CHART_TOOLTIP_LABEL_STYLE,
-  CHART_STROKE_SEPARATOR, COR_GASTOS, COR_INVESTIDO, COR_RECEITA, COR_APOSTAS, COR_ACCENT,
+  CHART_STROKE_SEPARATOR, COR_GASTOS, COR_INVESTIDO, COR_RECEITA_ICONE, COR_APOSTAS, COR_ACCENT,
 } from "../components/chartTheme";
 
 interface Props {
@@ -35,6 +35,53 @@ function formatarEixoValor(v: number): string {
   return Math.abs(v) >= 1000 ? `${Math.round(v / 1000)}k` : `${Math.round(v)}`;
 }
 
+function DonutComTotal({ children, total }: { children: ReactNode; total: number }) {
+  return (
+    <div style={{ position: "relative", width: 108, height: 108 }}>
+      {children}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          pointerEvents: "none",
+        }}
+      >
+        <span style={{ fontSize: 9, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Total</span>
+        <span className="cf-num" style={{ fontSize: 13, fontWeight: 700 }}>{formatarMoeda(total)}</span>
+      </div>
+    </div>
+  );
+}
+
+interface SaldoPontoProps {
+  cx?: number;
+  cy?: number;
+  index?: number;
+  payload?: { saldo: number };
+  ultimoIndice: number;
+  label: string;
+}
+
+function SaldoDotFinal({ cx, cy, index, payload, ultimoIndice, label }: SaldoPontoProps) {
+  if (cx === undefined || cy === undefined || index !== ultimoIndice || payload === undefined) return null;
+  return (
+    <g>
+      <rect x={cx - 98} y={cy - 34} width={92} height={30} rx={6} fill="#121018" stroke="rgba(255,255,255,0.14)" />
+      <text x={cx - 52} y={cy - 21} textAnchor="middle" fontSize={9} fill="#9A99AE">
+        {label}
+      </text>
+      <text x={cx - 52} y={cy - 10} textAnchor="middle" fontSize={11} fontWeight={700} fill="#F4F4F8">
+        {formatarMoeda(payload.saldo)}
+      </text>
+      <circle cx={cx} cy={cy} r={4} fill={COR_ACCENT} stroke="#0a0a0f" strokeWidth={2} />
+    </g>
+  );
+}
+
 const SEM_DADOS: CSSProperties = {
   display: "flex",
   alignItems: "center",
@@ -52,8 +99,15 @@ export function Dashboard({
 }: Props) {
   const historicoComLabel = historicoMensal.map((h) => {
     const [ano, mes] = h.chave.split("-");
-    return { ...h, label: `${MESES[parseInt(mes, 10) - 1]?.slice(0, 3) || mes}/${ano.slice(2)}` };
+    return {
+      ...h,
+      label: `${MESES[parseInt(mes, 10) - 1]?.slice(0, 3) || mes}/${ano.slice(2)}`,
+      saldo: h.receita - h.gastos - h.investido + h.lucroApostas,
+    };
   });
+
+  const mesAnteriorDate = new Date(refDate.getFullYear(), refDate.getMonth() - 1, 1);
+  const mesAnteriorLabel = `${MESES[mesAnteriorDate.getMonth()].slice(0, 3).toLowerCase()}/${mesAnteriorDate.getFullYear()}`;
 
   const serieReceita = historicoMensal.map((h) => h.receita);
   const serieGastos = historicoMensal.map((h) => h.gastos);
@@ -140,8 +194,9 @@ export function Dashboard({
           valorAnterior={resumoMesAnterior.receita}
           formatar={formatarMoeda}
           serieMensal={serieReceita}
-          corIcone={COR_RECEITA}
-          corSpark={COR_RECEITA}
+          corIcone={COR_RECEITA_ICONE}
+          corSpark={COR_RECEITA_ICONE}
+          rotuloAnterior={mesAnteriorLabel}
         />
         <KpiCard
           icone={<IconeCartao />}
@@ -153,6 +208,7 @@ export function Dashboard({
           corIcone={COR_GASTOS}
           corSpark={COR_GASTOS}
           direcaoBoa="baixa"
+          rotuloAnterior={mesAnteriorLabel}
         />
         <KpiCard
           icone={<IconeInvestimentos />}
@@ -163,6 +219,7 @@ export function Dashboard({
           serieMensal={serieInvestido}
           corIcone={COR_INVESTIDO}
           corSpark={COR_INVESTIDO}
+          rotuloAnterior={mesAnteriorLabel}
         />
         {resumoApostas.apostado > 0 && (
           <KpiCard
@@ -174,6 +231,7 @@ export function Dashboard({
             serieMensal={serieApostas}
             corIcone={COR_APOSTAS}
             corSpark={COR_APOSTAS}
+            rotuloAnterior={mesAnteriorLabel}
           />
         )}
         <KpiCard
@@ -185,14 +243,15 @@ export function Dashboard({
           serieMensal={serieSaldo}
           corIcone={COR_ACCENT}
           corSpark={COR_ACCENT}
+          rotuloAnterior={mesAnteriorLabel}
         />
       </section>
 
       <section style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 20 }}>
         <Painel titulo="Gastos por categoria">
           {resumoMes.porCategoria.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 108, height: 108 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+              <DonutComTotal total={totalGastosCategoria}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={resumoMes.porCategoria} dataKey="total" nameKey="label" innerRadius={32} outerRadius={52} paddingAngle={2}>
@@ -203,18 +262,38 @@ export function Dashboard({
                     <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
-                {categoriasOrdenadas.slice(0, 4).map((c) => (
-                  <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12 }}>
-                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: c.cor, flex: "0 0 auto" }} />
-                    <span style={{ color: "var(--ink-soft)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {c.label}
-                    </span>
-                    <span className="cf-num" style={{ flex: "0 0 auto" }}>{formatarMoeda(c.total)}</span>
-                  </div>
-                ))}
-              </div>
+              </DonutComTotal>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: "left", padding: "0 0 6px", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-soft)", fontWeight: 500 }}>
+                      Categoria
+                    </th>
+                    <th style={{ textAlign: "right", padding: "0 0 6px", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-soft)", fontWeight: 500 }}>
+                      Valor
+                    </th>
+                    <th style={{ textAlign: "right", padding: "0 0 6px 10px", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-soft)", fontWeight: 500 }}>
+                      %
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categoriasOrdenadas.slice(0, 4).map((c) => (
+                    <tr key={c.id}>
+                      <td style={{ padding: "3px 0", color: "var(--ink-soft)" }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <span style={{ width: 7, height: 7, borderRadius: "50%", background: c.cor, flex: "0 0 auto" }} />
+                          {c.label}
+                        </span>
+                      </td>
+                      <td className="cf-num" style={{ padding: "3px 0", textAlign: "right", whiteSpace: "nowrap" }}>{formatarMoeda(c.total)}</td>
+                      <td className="cf-num" style={{ padding: "3px 0 3px 10px", textAlign: "right", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                        {totalGastosCategoria > 0 ? Math.round((c.total / totalGastosCategoria) * 100) : 0}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : (
             <div style={SEM_DADOS}>Sem gastos registrados neste mês.</div>
@@ -226,13 +305,13 @@ export function Dashboard({
             <>
               <div style={{ display: "flex", gap: 12, marginBottom: 8, fontSize: 11, color: "var(--ink-soft)", flexWrap: "wrap" }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_INVESTIDO, display: "inline-block" }} />receita
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_GASTOS, display: "inline-block" }} />gastos
                 </span>
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_INVESTIDO, display: "inline-block" }} />investido
-                </span>
-                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 10, height: 1.5, background: COR_RECEITA, display: "inline-block" }} />receita
+                  <span style={{ width: 10, height: 1.5, background: COR_ACCENT, display: "inline-block" }} />saldo
                 </span>
               </div>
               <ResponsiveContainer width="100%" height={170}>
@@ -241,9 +320,9 @@ export function Dashboard({
                   <XAxis dataKey="label" tick={{ fill: CHART_AXIS_TEXT, fontSize: 10.5 }} axisLine={{ stroke: CHART_AXIS_LINE }} tickLine={false} />
                   <YAxis tick={{ fill: CHART_AXIS_TEXT, fontSize: 10.5 }} axisLine={false} tickLine={false} tickFormatter={formatarEixoValor} />
                   <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
+                  <Bar dataKey="receita" name="Receita" fill={COR_INVESTIDO} radius={[3, 3, 0, 0]} barSize={10} />
                   <Bar dataKey="gastos" name="Gastos" fill={COR_GASTOS} radius={[3, 3, 0, 0]} barSize={10} />
-                  <Bar dataKey="investido" name="Investido" fill={COR_INVESTIDO} radius={[3, 3, 0, 0]} barSize={10} />
-                  <Line dataKey="receita" name="Receita" stroke={COR_RECEITA} strokeWidth={1.75} strokeDasharray="4 3" dot={{ r: 2.5, fill: COR_RECEITA }} />
+                  <Line dataKey="saldo" name="Saldo" stroke={COR_ACCENT} strokeWidth={1.75} dot={{ r: 2.5, fill: COR_ACCENT }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </>
@@ -255,7 +334,7 @@ export function Dashboard({
         <Painel titulo="Evolução do saldo acumulado">
           {saldoAcumulado.length > 1 ? (
             <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={saldoAcumulado} margin={{ top: 6, right: 4, left: -22, bottom: 0 }}>
+              <AreaChart data={saldoAcumulado} margin={{ top: 42, right: 4, left: -22, bottom: 0 }}>
                 <defs>
                   <linearGradient id="saldoAcumuladoGradiente" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={COR_ACCENT} stopOpacity={0.4} />
@@ -264,9 +343,29 @@ export function Dashboard({
                 </defs>
                 <CartesianGrid stroke={CHART_GRID} vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: CHART_AXIS_TEXT, fontSize: 10.5 }} axisLine={{ stroke: CHART_AXIS_LINE }} tickLine={false} />
-                <YAxis tick={{ fill: CHART_AXIS_TEXT, fontSize: 10.5 }} axisLine={false} tickLine={false} tickFormatter={formatarEixoValor} />
+                <YAxis
+                  domain={[(min: number) => Math.min(0, min), (max: number) => Math.ceil(max * 1.25)]}
+                  tick={{ fill: CHART_AXIS_TEXT, fontSize: 10.5 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={formatarEixoValor}
+                />
                 <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
-                <Area type="monotone" dataKey="saldo" stroke={COR_ACCENT} strokeWidth={2} fill="url(#saldoAcumuladoGradiente)" />
+                <Area
+                  type="monotone"
+                  dataKey="saldo"
+                  stroke={COR_ACCENT}
+                  strokeWidth={2}
+                  fill="url(#saldoAcumuladoGradiente)"
+                  dot={({ key, ...props }) => (
+                    <SaldoDotFinal
+                      key={key}
+                      {...props}
+                      ultimoIndice={saldoAcumulado.length - 1}
+                      label={saldoAcumulado[saldoAcumulado.length - 1]?.label || ""}
+                    />
+                  )}
+                />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -285,8 +384,8 @@ export function Dashboard({
           }
         >
           {categoriasOrdenadas.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 108, height: 108 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+              <DonutComTotal total={totalGastosCategoria}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={categoriasOrdenadas} dataKey="total" nameKey="label" innerRadius={32} outerRadius={52} paddingAngle={2}>
@@ -297,20 +396,34 @@ export function Dashboard({
                     <Tooltip formatter={(v: number) => formatarPct((v / (totalGastosCategoria || 1)) * 100)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
-                {categoriasOrdenadas.slice(0, 4).map((c) => (
-                  <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12 }}>
-                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: c.cor, flex: "0 0 auto" }} />
-                    <span style={{ color: "var(--ink-soft)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {c.label}
-                    </span>
-                    <span className="cf-num" style={{ flex: "0 0 auto", color: "var(--text-muted)" }}>
-                      {totalGastosCategoria > 0 ? Math.round((c.total / totalGastosCategoria) * 100) : 0}%
-                    </span>
-                  </div>
-                ))}
-              </div>
+              </DonutComTotal>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: "left", padding: "0 0 6px", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-soft)", fontWeight: 500 }}>
+                      Categoria
+                    </th>
+                    <th style={{ textAlign: "right", padding: "0 0 6px", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-soft)", fontWeight: 500 }}>
+                      %
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categoriasOrdenadas.slice(0, 4).map((c) => (
+                    <tr key={c.id}>
+                      <td style={{ padding: "3px 0", color: "var(--ink-soft)" }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, maxWidth: 130, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <span style={{ width: 7, height: 7, borderRadius: "50%", background: c.cor, flex: "0 0 auto" }} />
+                          {c.label}
+                        </span>
+                      </td>
+                      <td className="cf-num" style={{ padding: "3px 0", textAlign: "right", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                        {totalGastosCategoria > 0 ? Math.round((c.total / totalGastosCategoria) * 100) : 0}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : (
             <div style={SEM_DADOS}>Sem gastos registrados neste mês.</div>
@@ -354,16 +467,16 @@ export function Dashboard({
         >
           {ultimosLancamentos.length > 0 ? (
             <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                    {["Data", "Descrição", "Valor"].map((titulo, i) => (
+                    {["Data", "Descrição", "Categoria", "", "Valor"].map((titulo, i) => (
                       <th
-                        key={titulo}
+                        key={titulo || i}
                         style={{
-                          textAlign: i === 2 ? "right" : "left",
+                          textAlign: i === 4 ? "right" : i === 3 ? "center" : "left",
                           padding: "5px 6px",
-                          fontSize: 10,
+                          fontSize: 9.5,
                           textTransform: "uppercase",
                           letterSpacing: "0.04em",
                           color: "var(--ink-soft)",
@@ -377,19 +490,22 @@ export function Dashboard({
                 </thead>
                 <tbody>
                   {ultimosLancamentos.map((t) => {
-                    const isReceita = t.tipo === "receita";
-                    const isInv = t.tipo === "investimento";
-                    const cor = isReceita ? "var(--ink)" : isInv ? "var(--verde)" : "var(--rust)";
+                    const entrada = t.tipo === "receita" || t.tipo === "investimento";
+                    const cor = entrada ? "var(--verde)" : "var(--rust)";
                     return (
                       <tr key={t.id} style={{ borderBottom: "1px solid var(--border)" }}>
                         <td className="cf-num" style={{ padding: "7px 6px", color: "var(--ink-soft)", whiteSpace: "nowrap" }}>
                           {new Date(t.data).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
                         </td>
-                        <td style={{ padding: "7px 6px", maxWidth: 110, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <td style={{ padding: "7px 6px", maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {t.descricao}
                         </td>
+                        <td style={{ padding: "7px 6px", color: "var(--ink-soft)", whiteSpace: "nowrap" }}>
+                          {t.tipo === "receita" ? "Receita" : t.tipo === "investimento" ? "Investimento" : catLabel(t.categoria)}
+                        </td>
+                        <td style={{ padding: "7px 6px", textAlign: "center", color: cor, fontWeight: 700 }}>{entrada ? "↑" : "↓"}</td>
                         <td className="cf-num" style={{ padding: "7px 6px", textAlign: "right", color: cor, fontWeight: 600, whiteSpace: "nowrap" }}>
-                          {isReceita || isInv ? "+" : "−"} {formatarMoeda(t.valor)}
+                          {formatarMoeda(t.valor)}
                         </td>
                       </tr>
                     );

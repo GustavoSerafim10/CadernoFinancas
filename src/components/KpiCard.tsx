@@ -13,10 +13,11 @@ interface Props {
   corIcone: string;
   corSpark: string;
   direcaoBoa?: "alta" | "baixa";
+  rotuloAnterior?: string;
 }
 
 export function KpiCard({
-  icone, label, valor, valorAnterior, formatar, serieMensal, corIcone, corSpark, direcaoBoa = "alta",
+  icone, label, valor, valorAnterior, formatar, serieMensal, corIcone, corSpark, direcaoBoa = "alta", rotuloAnterior,
 }: Props) {
   const gradientId = useId();
   const temComparacao = valorAnterior !== 0;
@@ -30,36 +31,34 @@ export function KpiCard({
 
   return (
     <div className="cf-card" style={{ ...cartaoEstilo, padding: "16px 18px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "rgba(255,255,255,0.05)",
-              color: corIcone,
-              flex: "0 0 auto",
-            }}
-          >
-            {icone}
-          </span>
-          <div style={{ ...rotuloCampo, marginBottom: 0 }}>{label}</div>
-        </div>
-        {temComparacao && (
-          <span
-            className="cf-num"
-            style={{ fontSize: 11, color: corBadge, whiteSpace: "nowrap" }}
-          >
-            {subiu ? "↑" : diff < 0 ? "↓" : "—"} {formatarPctAbs(pct)}
-          </span>
-        )}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: `${corIcone}26`,
+            border: `1px solid ${corIcone}4d`,
+            color: corIcone,
+            flex: "0 0 auto",
+          }}
+        >
+          {icone}
+        </span>
+        <div style={{ ...rotuloCampo, marginBottom: 0 }}>{label}</div>
       </div>
 
       <NumeroAnimado valor={valor} formatar={formatar} className="cf-num" style={{ fontSize: 21, fontWeight: 700 }} />
+
+      {temComparacao && (
+        <span className="cf-num" style={{ fontSize: 11, color: corBadge, whiteSpace: "nowrap" }}>
+          {subiu ? "↑" : diff < 0 ? "↓" : "—"} {formatarPctAbs(pct)}
+          {rotuloAnterior && <span style={{ color: "var(--ink-soft)", fontWeight: 400 }}> vs {rotuloAnterior}</span>}
+        </span>
+      )}
 
       {dadosSpark.length > 1 && (
         <div style={{ height: 32, margin: "0 -2px" }}>

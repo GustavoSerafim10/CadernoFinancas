@@ -22,6 +22,7 @@ export const CHART_TOOLTIP_ITEM_STYLE: CSSProperties = { color: "#F4F4F8" };
 export const CHART_TOOLTIP_LABEL_STYLE: CSSProperties = { color: "#9A99AE", marginBottom: 4 };
 
 export const COR_RECEITA = "#F4F4F8";
+export const COR_RECEITA_ICONE = "#60A5FA";
 export const COR_GASTOS = "#F2586B";
 export const COR_INVESTIDO = "#35D07F";
 export const COR_APOSTAS = "#C084FC";

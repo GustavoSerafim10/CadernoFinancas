@@ -84,8 +84,11 @@ export default function App() {
               <span className="cf-icone-decorativo" title="Notificações">
                 <IconeSino />
               </span>
-              <span className="cf-avatar" title="Gustavo Vinicius">
-                GV
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span className="cf-avatar" title="Gustavo Vinicius">
+                  GV
+                </span>
+                <span style={{ color: "var(--ink-soft)", fontSize: 10 }}>⌄</span>
               </span>
             </div>
           </div>
