@@ -34,19 +34,19 @@ export function KpiCard({
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span
           style={{
-            width: 62,
-            height: 62,
-            borderRadius: 17,
+            width: 36,
+            height: 36,
+            borderRadius: 10,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: `${corIcone}33`,
-            border: `1px solid ${corIcone}66`,
+            background: `${corIcone}26`,
+            border: `1px solid ${corIcone}4d`,
             color: corIcone,
             flex: "0 0 auto",
           }}
         >
-          <span style={{ display: "flex", transform: "scale(2.3)" }}>{icone}</span>
+          {icone}
         </span>
         <div style={{ ...rotuloCampo, marginBottom: 0 }}>{label}</div>
       </div>
