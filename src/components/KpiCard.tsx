@@ -34,14 +34,14 @@ export function KpiCard({
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span
           style={{
-            width: 34,
-            height: 34,
-            borderRadius: 10,
+            width: 40,
+            height: 40,
+            borderRadius: 12,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: `${corIcone}26`,
-            border: `1px solid ${corIcone}4d`,
+            background: `${corIcone}33`,
+            border: `1px solid ${corIcone}66`,
             color: corIcone,
             flex: "0 0 auto",
           }}

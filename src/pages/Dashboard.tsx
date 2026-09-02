@@ -2,7 +2,7 @@ import { useMemo, CSSProperties, ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   ComposedChart, Bar, BarChart, Line, Area, AreaChart, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList,
 } from "recharts";
 import { ResumoMes, PontoHistorico, Insight, ResumoApostas, Transacao } from "../types";
 import { MESES, catLabel, PaginaId } from "../constants";
@@ -33,6 +33,26 @@ interface Props {
 
 function formatarEixoValor(v: number): string {
   return Math.abs(v) >= 1000 ? `${Math.round(v / 1000)}k` : `${Math.round(v)}`;
+}
+
+interface TickMesAtualProps {
+  x?: number;
+  y?: number;
+  payload?: { value: string };
+  ultimoLabel: string;
+}
+
+function TickMesAtual({ x, y, payload, ultimoLabel }: TickMesAtualProps) {
+  if (x === undefined || y === undefined || payload === undefined) return null;
+  const ativo = payload.value === ultimoLabel;
+  return (
+    <g transform={`translate(${x},${y})`}>
+      {ativo && <rect x={-18} y={-3} width={36} height={17} rx={8} fill="var(--accent)" fillOpacity={0.3} />}
+      <text x={0} y={9} textAnchor="middle" fontSize={10.5} fill={ativo ? "#F4F4F8" : CHART_AXIS_TEXT} fontWeight={ativo ? 700 : 400}>
+        {payload.value}
+      </text>
+    </g>
+  );
 }
 
 function DonutComTotal({ children, total }: { children: ReactNode; total: number }) {
@@ -191,7 +211,7 @@ export function Dashboard({
         </section>
       )}
 
-      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 32 }}>
+      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(178px, 1fr))", gap: 14, marginBottom: 32 }}>
         <KpiCard
           icone={<IconeCarteira />}
           label="receita"
@@ -226,19 +246,17 @@ export function Dashboard({
           corSpark={COR_INVESTIDO}
           rotuloAnterior={mesAnteriorLabel}
         />
-        {resumoApostas.apostado > 0 && (
-          <KpiCard
-            icone={<IconeApostas />}
-            label="apostas"
-            valor={resumoApostas.lucro}
-            valorAnterior={serieApostas[serieApostas.length - 2] ?? 0}
-            formatar={(v) => `${v >= 0 ? "+" : ""}${formatarMoeda(v)}`}
-            serieMensal={serieApostas}
-            corIcone={COR_APOSTAS}
-            corSpark={COR_APOSTAS}
-            rotuloAnterior={mesAnteriorLabel}
-          />
-        )}
+        <KpiCard
+          icone={<IconeApostas />}
+          label="apostas"
+          valor={resumoApostas.lucro}
+          valorAnterior={serieApostas[serieApostas.length - 2] ?? 0}
+          formatar={(v) => `${v >= 0 ? "+" : ""}${formatarMoeda(v)}`}
+          serieMensal={serieApostas}
+          corIcone={COR_APOSTAS}
+          corSpark={COR_APOSTAS}
+          rotuloAnterior={mesAnteriorLabel}
+        />
         <KpiCard
           icone={<IconeSaldo />}
           label="saldo livre"
@@ -322,7 +340,14 @@ export function Dashboard({
               <ResponsiveContainer width="100%" height={170}>
                 <ComposedChart data={historicoComLabel} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
                   <CartesianGrid stroke={CHART_GRID} vertical={false} />
-                  <XAxis dataKey="label" tick={{ fill: CHART_AXIS_TEXT, fontSize: 10.5 }} axisLine={{ stroke: CHART_AXIS_LINE }} tickLine={false} />
+                  <XAxis
+                    dataKey="label"
+                    tick={(props) => (
+                      <TickMesAtual {...props} ultimoLabel={historicoComLabel[historicoComLabel.length - 1]?.label || ""} />
+                    )}
+                    axisLine={{ stroke: CHART_AXIS_LINE }}
+                    tickLine={false}
+                  />
                   <YAxis tick={{ fill: CHART_AXIS_TEXT, fontSize: 10.5 }} axisLine={false} tickLine={false} tickFormatter={formatarEixoValor} />
                   <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
                   <Bar dataKey="receita" name="Receita" fill={COR_INVESTIDO} radius={[3, 3, 0, 0]} barSize={10} />
@@ -440,20 +465,24 @@ export function Dashboard({
             <>
               <div style={{ display: "flex", gap: 12, marginBottom: 8, fontSize: 11, color: "var(--ink-soft)" }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 7, height: 7, borderRadius: 2, background: "rgba(255,255,255,0.22)", display: "inline-block" }} />mês anterior
+                  <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_INVESTIDO, display: "inline-block" }} />este mês
                 </span>
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_ACCENT, display: "inline-block" }} />este mês
+                  <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_ACCENT, display: "inline-block" }} />mês anterior
                 </span>
               </div>
-              <ResponsiveContainer width="100%" height={Math.max(140, comparativoCategorias.length * 34)}>
-                <BarChart data={comparativoCategorias} layout="vertical" margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+              <ResponsiveContainer width="100%" height={Math.max(140, comparativoCategorias.length * 40)}>
+                <BarChart data={comparativoCategorias} layout="vertical" margin={{ top: 4, right: 58, left: 0, bottom: 4 }}>
                   <CartesianGrid stroke={CHART_GRID} horizontal={false} />
                   <XAxis type="number" tick={{ fill: CHART_AXIS_TEXT, fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={formatarEixoValor} />
                   <YAxis type="category" dataKey="label" width={78} tick={{ fill: CHART_AXIS_TEXT, fontSize: 10.5 }} axisLine={false} tickLine={false} />
                   <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
-                  <Bar dataKey="anterior" name="mês anterior" fill="rgba(255,255,255,0.18)" radius={[0, 3, 3, 0]} barSize={7} />
-                  <Bar dataKey="atual" name="este mês" fill={COR_ACCENT} radius={[0, 3, 3, 0]} barSize={7} />
+                  <Bar dataKey="atual" name="este mês" fill={COR_INVESTIDO} radius={[0, 3, 3, 0]} barSize={7}>
+                    <LabelList dataKey="atual" position="right" formatter={(v: number) => formatarMoeda(v)} fill={CHART_AXIS_TEXT} fontSize={9.5} />
+                  </Bar>
+                  <Bar dataKey="anterior" name="mês anterior" fill={COR_ACCENT} radius={[0, 3, 3, 0]} barSize={7}>
+                    <LabelList dataKey="anterior" position="right" formatter={(v: number) => formatarMoeda(v)} fill={CHART_AXIS_TEXT} fontSize={9.5} />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </>
