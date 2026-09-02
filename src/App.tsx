@@ -1,7 +1,9 @@
 import { useState, Suspense, lazy } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { TopTabs } from "./components/TopTabs";
-import { IconeSino } from "./components/Icones";
+import { SeletorMes } from "./components/SeletorMes";
+import { IconeSino, IconeDownload } from "./components/Icones";
+import { botaoSecundario } from "./components/estilosComuns";
 import { CosmicBackground } from "./components/CosmicBackground";
 import { FinanceHud } from "./components/FinanceHud";
 import { useFinancas } from "./hooks/useFinancas";
@@ -95,7 +97,23 @@ export default function App() {
           </div>
         </header>
 
-        <TopTabs pagina={pagina} setPagina={setPagina} />
+        <TopTabs
+          pagina={pagina}
+          setPagina={setPagina}
+          right={
+            pagina === "dashboard" ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <SeletorMes refDate={refDate} mudarMes={mudarMes} semMargem />
+                <button onClick={exportarCSV} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}>
+                  <IconeDownload /> Exportar CSV
+                </button>
+                <button onClick={exportarTudoJSON} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}>
+                  <IconeDownload /> Exportar JSON
+                </button>
+              </div>
+            ) : undefined
+          }
+        />
 
         {financas.erro && <div className="erro">{financas.erro}</div>}
 
@@ -106,15 +124,12 @@ export default function App() {
             {pagina === "dashboard" ? (
               <Dashboard
                 refDate={refDate}
-                mudarMes={mudarMes}
                 resumoMes={financas.resumoMes}
                 resumoMesAnterior={financas.resumoMesAnterior}
                 historicoMensal={financas.historicoMensal}
                 transacoesDoMes={financas.transacoesDoMes}
                 insights={financas.insights}
                 resumoApostas={financas.resumoApostas}
-                exportarCSV={exportarCSV}
-                exportarTudoJSON={exportarTudoJSON}
                 setPagina={setPagina}
               />
             ) : pagina === "extrato" ? (

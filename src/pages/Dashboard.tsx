@@ -7,11 +7,10 @@ import {
 import { ResumoMes, PontoHistorico, Insight, ResumoApostas, Transacao } from "../types";
 import { MESES, catLabel, PaginaId } from "../constants";
 import { formatarMoeda, formatarPct } from "../utils/format";
-import { SeletorMes } from "../components/SeletorMes";
 import { KpiCard } from "../components/KpiCard";
 import { Painel } from "../components/Painel";
-import { IconeCarteira, IconeCartao, IconeInvestimentos, IconeApostas, IconeSaldo, IconeDownload } from "../components/Icones";
-import { rotuloCampo, cartaoEstilo, botaoSecundario } from "../components/estilosComuns";
+import { IconeCarteira, IconeCartao, IconeInvestimentos, IconeApostas, IconeSaldo } from "../components/Icones";
+import { rotuloCampo, cartaoEstilo } from "../components/estilosComuns";
 import {
   CHART_GRID, CHART_AXIS_TEXT, CHART_AXIS_LINE, CHART_TOOLTIP_STYLE, CHART_TOOLTIP_ITEM_STYLE, CHART_TOOLTIP_LABEL_STYLE,
   CHART_STROKE_SEPARATOR, COR_GASTOS, COR_INVESTIDO, COR_RECEITA_ICONE, COR_APOSTAS, COR_ACCENT,
@@ -19,15 +18,12 @@ import {
 
 interface Props {
   refDate: Date;
-  mudarMes: (delta: number) => void;
   resumoMes: ResumoMes;
   resumoMesAnterior: ResumoMes;
   historicoMensal: PontoHistorico[];
   transacoesDoMes: Transacao[];
   insights: Insight[];
   resumoApostas: ResumoApostas;
-  exportarCSV: () => void;
-  exportarTudoJSON: () => void;
   setPagina: (p: PaginaId) => void;
 }
 
@@ -119,8 +115,8 @@ const SEM_DADOS: CSSProperties = {
 };
 
 export function Dashboard({
-  refDate, mudarMes, resumoMes, resumoMesAnterior, historicoMensal, transacoesDoMes,
-  insights, resumoApostas, exportarCSV, exportarTudoJSON, setPagina,
+  refDate, resumoMes, resumoMesAnterior, historicoMensal, transacoesDoMes,
+  insights, resumoApostas, setPagina,
 }: Props) {
   const historicoComLabel = historicoMensal.map((h) => {
     const [ano, mes] = h.chave.split("-");
@@ -178,18 +174,6 @@ export function Dashboard({
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 14, marginBottom: 28 }}>
-        <SeletorMes refDate={refDate} mudarMes={mudarMes} semMargem />
-        <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={exportarCSV} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}>
-            <IconeDownload /> Exportar CSV
-          </button>
-          <button onClick={exportarTudoJSON} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}>
-            <IconeDownload /> Exportar JSON
-          </button>
-        </div>
-      </div>
-
       {insights.length > 0 && (
         <section style={{ marginBottom: 28 }}>
           <div style={rotuloCampo}>insights automáticos</div>
