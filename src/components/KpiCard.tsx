@@ -34,9 +34,9 @@ export function KpiCard({
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
+            width: 46,
+            height: 46,
+            borderRadius: 13,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -46,7 +46,7 @@ export function KpiCard({
             flex: "0 0 auto",
           }}
         >
-          {icone}
+          <span style={{ display: "flex", transform: "scale(1.55)" }}>{icone}</span>
         </span>
         <div style={{ ...rotuloCampo, marginBottom: 0 }}>{label}</div>
       </div>
