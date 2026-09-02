@@ -53,7 +53,7 @@ function TickMesAtual({ x, y, payload, ultimoLabel }: TickMesAtualProps) {
 
 function DonutComTotal({ children, total }: { children: ReactNode; total: number }) {
   return (
-    <div style={{ position: "relative", width: 108, height: 108 }}>
+    <div style={{ position: "relative", width: 142, height: 142 }}>
       {children}
       <div
         style={{
@@ -66,8 +66,8 @@ function DonutComTotal({ children, total }: { children: ReactNode; total: number
           pointerEvents: "none",
         }}
       >
-        <span style={{ fontSize: 9, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Total</span>
-        <span className="cf-num" style={{ fontSize: 13, fontWeight: 700 }}>{formatarMoeda(total)}</span>
+        <span style={{ fontSize: 10, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Total</span>
+        <span className="cf-num" style={{ fontSize: 15, fontWeight: 700 }}>{formatarMoeda(total)}</span>
       </div>
     </div>
   );
@@ -263,7 +263,7 @@ export function Dashboard({
               <DonutComTotal total={totalGastosCategoria}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={resumoMes.porCategoria} dataKey="total" nameKey="label" innerRadius={32} outerRadius={52} paddingAngle={2}>
+                    <Pie data={resumoMes.porCategoria} dataKey="total" nameKey="label" innerRadius={42} outerRadius={68} paddingAngle={2}>
                       {resumoMes.porCategoria.map((c) => (
                         <Cell key={c.id} fill={c.cor} stroke={CHART_STROKE_SEPARATOR} strokeWidth={2} />
                       ))}
@@ -411,7 +411,7 @@ export function Dashboard({
               <DonutComTotal total={totalGastosCategoria}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={categoriasOrdenadas} dataKey="total" nameKey="label" innerRadius={32} outerRadius={52} paddingAngle={2}>
+                    <Pie data={categoriasOrdenadas} dataKey="total" nameKey="label" innerRadius={42} outerRadius={68} paddingAngle={2}>
                       {categoriasOrdenadas.map((c) => (
                         <Cell key={c.id} fill={c.cor} stroke={CHART_STROKE_SEPARATOR} strokeWidth={2} />
                       ))}
