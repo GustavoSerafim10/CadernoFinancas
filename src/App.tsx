@@ -1,5 +1,6 @@
 import { useState, Suspense, lazy } from "react";
 import { Sidebar } from "./components/Sidebar";
+import { TopTabs } from "./components/TopTabs";
 import { IconeSino } from "./components/Icones";
 import { CosmicBackground } from "./components/CosmicBackground";
 import { FinanceHud } from "./components/FinanceHud";
@@ -93,6 +94,8 @@ export default function App() {
             </div>
           </div>
         </header>
+
+        <TopTabs pagina={pagina} setPagina={setPagina} />
 
         {financas.erro && <div className="erro">{financas.erro}</div>}
 

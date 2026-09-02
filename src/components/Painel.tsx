@@ -13,7 +13,7 @@ export function Painel({ titulo, acao, rodape, children }: Props) {
   return (
     <div className="cf-card" style={{ ...cartaoEstilo, display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 16 }}>
-        <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--ink)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+        <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ink)" }}>
           {titulo}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>

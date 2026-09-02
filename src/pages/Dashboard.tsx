@@ -67,17 +67,22 @@ interface SaldoPontoProps {
 }
 
 function SaldoDotFinal({ cx, cy, index, payload, ultimoIndice, label }: SaldoPontoProps) {
-  if (cx === undefined || cy === undefined || index !== ultimoIndice || payload === undefined) return null;
+  if (cx === undefined || cy === undefined || payload === undefined) return null;
+  const isUltimo = index === ultimoIndice;
   return (
     <g>
-      <rect x={cx - 98} y={cy - 34} width={92} height={30} rx={6} fill="#121018" stroke="rgba(255,255,255,0.14)" />
-      <text x={cx - 52} y={cy - 21} textAnchor="middle" fontSize={9} fill="#9A99AE">
-        {label}
-      </text>
-      <text x={cx - 52} y={cy - 10} textAnchor="middle" fontSize={11} fontWeight={700} fill="#F4F4F8">
-        {formatarMoeda(payload.saldo)}
-      </text>
-      <circle cx={cx} cy={cy} r={4} fill={COR_ACCENT} stroke="#0a0a0f" strokeWidth={2} />
+      {isUltimo && (
+        <>
+          <rect x={cx - 98} y={cy - 34} width={92} height={30} rx={6} fill="#121018" stroke="rgba(255,255,255,0.14)" />
+          <text x={cx - 52} y={cy - 21} textAnchor="middle" fontSize={9} fill="#9A99AE">
+            {label}
+          </text>
+          <text x={cx - 52} y={cy - 10} textAnchor="middle" fontSize={11} fontWeight={700} fill="#F4F4F8">
+            {formatarMoeda(payload.saldo)}
+          </text>
+        </>
+      )}
+      <circle cx={cx} cy={cy} r={isUltimo ? 4 : 2.5} fill={COR_ACCENT} stroke="#0a0a0f" strokeWidth={isUltimo ? 2 : 1.5} />
     </g>
   );
 }
@@ -248,7 +253,7 @@ export function Dashboard({
       </section>
 
       <section style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 20 }}>
-        <Painel titulo="Gastos por categoria">
+        <Painel titulo="Gastos por Categoria">
           {resumoMes.porCategoria.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
               <DonutComTotal total={totalGastosCategoria}>
@@ -300,7 +305,7 @@ export function Dashboard({
           )}
         </Painel>
 
-        <Painel titulo="Fluxo de caixa mensal" acao={<span className="cf-pill-decorativo">Últimos 12 meses ⌄</span>}>
+        <Painel titulo="Fluxo de Caixa Mensal" acao={<span className="cf-pill-decorativo">Últimos 12 meses ⌄</span>}>
           {historicoComLabel.length > 1 ? (
             <>
               <div style={{ display: "flex", gap: 12, marginBottom: 8, fontSize: 11, color: "var(--ink-soft)", flexWrap: "wrap" }}>
@@ -331,7 +336,7 @@ export function Dashboard({
           )}
         </Painel>
 
-        <Painel titulo="Evolução do saldo acumulado">
+        <Painel titulo="Evolução do saldo">
           {saldoAcumulado.length > 1 ? (
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={saldoAcumulado} margin={{ top: 42, right: 4, left: -22, bottom: 0 }}>
@@ -376,7 +381,7 @@ export function Dashboard({
 
       <section style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
         <Painel
-          titulo="Distribuição por categoria"
+          titulo="Distribuição por Categoria"
           rodape={
             <button onClick={() => setPagina("metas")} className="cf-link-mais cf-focus">
               Ver todas categorias →
@@ -430,7 +435,7 @@ export function Dashboard({
           )}
         </Painel>
 
-        <Painel titulo="Comparativo por categoria">
+        <Painel titulo="Gastos por Categoria (Comparativo)">
           {comparativoCategorias.length > 0 ? (
             <>
               <div style={{ display: "flex", gap: 12, marginBottom: 8, fontSize: 11, color: "var(--ink-soft)" }}>
@@ -458,7 +463,7 @@ export function Dashboard({
         </Painel>
 
         <Painel
-          titulo="Últimos lançamentos"
+          titulo="Últimos Lançamentos"
           rodape={
             <button onClick={() => setPagina("extrato")} className="cf-link-mais cf-focus">
               Ver todos lançamentos →
