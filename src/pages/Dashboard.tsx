@@ -439,19 +439,27 @@ export function Dashboard({
                   </tr>
                 </thead>
                 <tbody>
-                  {categoriasOrdenadas.slice(0, 4).map((c) => (
-                    <tr key={c.id}>
-                      <td style={{ padding: "3px 0", color: "var(--ink-soft)" }}>
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, maxWidth: 130, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          <span style={{ width: 7, height: 7, borderRadius: "50%", background: c.cor, flex: "0 0 auto" }} />
-                          {c.label}
-                        </span>
-                      </td>
-                      <td className="cf-num" style={{ padding: "3px 0", textAlign: "right", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-                        {totalGastosCategoria > 0 ? Math.round((c.total / totalGastosCategoria) * 100) : 0}%
-                      </td>
-                    </tr>
-                  ))}
+                  {categoriasOrdenadas.slice(0, 4).map((c) => {
+                    const pct = totalGastosCategoria > 0 ? Math.round((c.total / totalGastosCategoria) * 100) : 0;
+                    return (
+                      <tr key={c.id}>
+                        <td style={{ padding: "4px 0", color: "var(--ink-soft)" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ width: 7, height: 7, borderRadius: "50%", background: c.cor, flex: "0 0 auto" }} />
+                            <span style={{ flex: "0 0 auto", maxWidth: 82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {c.label}
+                            </span>
+                            <span style={{ flex: 1, height: 5, borderRadius: 3, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
+                              <span style={{ display: "block", height: "100%", width: `${pct}%`, borderRadius: 3, background: c.cor }} />
+                            </span>
+                          </div>
+                        </td>
+                        <td className="cf-num" style={{ padding: "4px 0 4px 10px", textAlign: "right", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                          {pct}%
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
