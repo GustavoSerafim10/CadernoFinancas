@@ -93,7 +93,7 @@ export function Sidebar({ pagina, setPagina }: Props) {
                 }}
               />
             )}
-            <span style={{ position: "relative", display: "flex", transform: "scale(1.3)" }}>
+            <span style={{ position: "relative", display: "flex", transform: "scale(1.55)" }}>
               <Icone />
             </span>
           </button>
