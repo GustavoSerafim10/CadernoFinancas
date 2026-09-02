@@ -266,7 +266,7 @@ export function useFinancas(monthKey: string) {
   );
 
   const historicoMensal: PontoHistorico[] = useMemo(() => {
-    const chaves = Array.from(new Set(transacoes.map((t) => t.data.slice(0, 7)))).sort().slice(-12);
+    const chaves = [...mesesAnteriores(monthKey, 11).reverse(), monthKey];
     return chaves.map((mk) => {
       const doMes = transacoes.filter((t) => t.data.startsWith(mk));
       const apostasMes = apostas.filter((a) => a.data.startsWith(mk));
@@ -278,7 +278,7 @@ export function useFinancas(monthKey: string) {
         lucroApostas: apostasMes.reduce((s, a) => s + lucroAposta(a), 0),
       };
     });
-  }, [transacoes, apostas]);
+  }, [transacoes, apostas, monthKey]);
 
   const insights = useMemo(() => calcularInsights(transacoes, monthKey), [transacoes, monthKey]);
 
