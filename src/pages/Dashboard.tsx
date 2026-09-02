@@ -282,7 +282,14 @@ export function Dashboard({
                         <Cell key={c.id} fill={c.cor} stroke={CHART_STROKE_SEPARATOR} strokeWidth={2} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
+                    <Tooltip
+                      formatter={(v: number) => formatarMoeda(v)}
+                      contentStyle={CHART_TOOLTIP_STYLE}
+                      itemStyle={CHART_TOOLTIP_ITEM_STYLE}
+                      labelStyle={CHART_TOOLTIP_LABEL_STYLE}
+                      position={{ x: -20, y: -66 }}
+                      allowEscapeViewBox={{ x: true, y: true }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </DonutComTotal>
@@ -423,7 +430,14 @@ export function Dashboard({
                         <Cell key={c.id} fill={c.cor} stroke={CHART_STROKE_SEPARATOR} strokeWidth={2} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number) => formatarPct((v / (totalGastosCategoria || 1)) * 100)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
+                    <Tooltip
+                      formatter={(v: number) => formatarPct((v / (totalGastosCategoria || 1)) * 100)}
+                      contentStyle={CHART_TOOLTIP_STYLE}
+                      itemStyle={CHART_TOOLTIP_ITEM_STYLE}
+                      labelStyle={CHART_TOOLTIP_LABEL_STYLE}
+                      position={{ x: -20, y: -66 }}
+                      allowEscapeViewBox={{ x: true, y: true }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </DonutComTotal>

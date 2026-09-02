@@ -12,6 +12,7 @@ export const CHART_TOOLTIP_STYLE: CSSProperties = {
   fontSize: 13,
   fontFamily: "'Inter', sans-serif",
   color: "#F4F4F8",
+  whiteSpace: "nowrap",
 };
 
 // Recharts renderiza cada item do tooltip com a cor da propria serie/fatia
