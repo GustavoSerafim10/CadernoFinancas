@@ -1,12 +1,13 @@
-import { useState, Suspense, lazy } from "react";
+import { useState, useRef, Suspense, lazy, ChangeEvent } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { TopTabs } from "./components/TopTabs";
 import { SeletorMes } from "./components/SeletorMes";
-import { IconeSino, IconeDownload, IconeX } from "./components/Icones";
+import { IconeSino, IconeDownload, IconeUpload, IconeX } from "./components/Icones";
 import { botaoSecundario, cartaoEstilo } from "./components/estilosComuns";
 import { CosmicBackground } from "./components/CosmicBackground";
 import { FinanceHud } from "./components/FinanceHud";
 import { useFinancas } from "./hooks/useFinancas";
+import { setItem } from "./services/storage";
 import { chaveDoMes } from "./utils/date";
 import { PaginaId } from "./constants";
 import { Extrato } from "./pages/Extrato";
@@ -22,6 +23,8 @@ export default function App() {
   const [refDate, setRefDate] = useState(new Date());
   const [pagina, setPagina] = useState<PaginaId>("dashboard");
   const [avisoOrigemDispensado, setAvisoOrigemDispensado] = useState(false);
+  const [erroImportacao, setErroImportacao] = useState<string | null>(null);
+  const inputImportacaoRef = useRef<HTMLInputElement>(null);
   const monthKey = chaveDoMes(refDate);
   const financas = useFinancas(monthKey);
 
@@ -70,6 +73,46 @@ export default function App() {
     URL.revokeObjectURL(url);
   }
 
+  function abrirSeletorImportacao() {
+    setErroImportacao(null);
+    inputImportacaoRef.current?.click();
+  }
+
+  async function importarTudoJSON(e: ChangeEvent<HTMLInputElement>) {
+    const arquivo = e.target.files?.[0];
+    e.target.value = "";
+    if (!arquivo) return;
+
+    let dados: Record<string, unknown>;
+    try {
+      dados = JSON.parse(await arquivo.text());
+    } catch {
+      setErroImportacao("Esse arquivo não é um JSON válido.");
+      return;
+    }
+
+    const chavesEsperadas = ["contas", "transacoes", "recorrencias", "metas", "investimentos", "apostas"] as const;
+    const chavesLista = ["contas", "transacoes", "recorrencias", "investimentos", "apostas"];
+    const valido =
+      chavesEsperadas.every((c) => c in dados) &&
+      chavesLista.every((c) => Array.isArray(dados[c])) &&
+      typeof dados.metas === "object" && dados.metas !== null && !Array.isArray(dados.metas);
+    if (!valido) {
+      setErroImportacao("Esse arquivo não parece ser um backup do Nightfolio (Exportar JSON).");
+      return;
+    }
+
+    const confirmado = window.confirm(
+      "Importar vai substituir TODOS os dados salvos neste navegador pelos dados desse arquivo. Essa ação não pode ser desfeita. Continuar?"
+    );
+    if (!confirmado) return;
+
+    for (const chave of chavesEsperadas) {
+      await setItem(chave, dados[chave]);
+    }
+    window.location.reload();
+  }
+
   return (
     <div className="app-shell">
       <div className="cosmic-foto" />
@@ -112,12 +155,25 @@ export default function App() {
                 <button onClick={exportarTudoJSON} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}>
                   <IconeDownload /> Exportar JSON
                 </button>
+                <button onClick={abrirSeletorImportacao} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}>
+                  <IconeUpload /> Importar JSON
+                </button>
+                <input
+                  ref={inputImportacaoRef}
+                  type="file"
+                  accept="application/json"
+                  onChange={importarTudoJSON}
+                  className="sr-only"
+                  aria-hidden="true"
+                  tabIndex={-1}
+                />
               </div>
             ) : undefined
           }
         />
 
         {financas.erro && <div className="erro">{financas.erro}</div>}
+        {erroImportacao && <div className="erro">{erroImportacao}</div>}
 
         {financas.primeiroAcesso && !avisoOrigemDispensado && (
           <div

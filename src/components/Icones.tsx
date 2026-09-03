@@ -134,6 +134,15 @@ export function IconeDownload() {
   );
 }
 
+export function IconeUpload() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <path d="M6.5 8.5V1.5M6.5 1.5L3.5 4.5M6.5 1.5L9.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M2 10.5V11.2C2 11.6 2.35 12 2.8 12H10.2C10.65 12 11 11.6 11 11.2V10.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconeCalendario() {
   return (
     <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
