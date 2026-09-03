@@ -35,6 +35,15 @@ export function calcularInsightsFinanceiros(
     }
   }
 
+  if (resumoMes.receita > 0 && resumoMes.gastos > 0) {
+    const pctGastos = (resumoMes.gastos / resumoMes.receita) * 100;
+    itens.push({
+      emoji: "📉",
+      texto: `Seus gastos representam ${Math.round(pctGastos)}% da sua receita este mês.`,
+      tom: pctGastos >= 80 ? "atencao" : "neutro",
+    });
+  }
+
   if (resumoMes.receita > 0) {
     const taxa = (resumoMes.saldo / resumoMes.receita) * 100;
     itens.push({
@@ -76,18 +85,26 @@ export function calcularInsightsFinanceiros(
     });
   }
 
-  Object.entries(metas).forEach(([catId, limite]) => {
-    if (limite <= 0) return;
-    const gasto = resumoMes.porCategoria.find((c) => c.id === catId)?.total || 0;
-    const pct = (gasto / limite) * 100;
-    if (pct >= 90) {
-      itens.push({
-        emoji: pct >= 100 ? "🚨" : "🎯",
-        texto: `Você já usou ${Math.round(pct)}% do orçamento de ${catLabel(catId)}.`,
-        tom: pct >= 100 ? "atencao" : "neutro",
-      });
-    }
-  });
+  const categoriasComMeta = Object.entries(metas).filter(([, limite]) => limite > 0);
+  if (categoriasComMeta.length === 0) {
+    itens.push({
+      emoji: "🎯",
+      texto: "Você ainda não definiu orçamento para nenhuma categoria.",
+      tom: "neutro",
+    });
+  } else {
+    categoriasComMeta.forEach(([catId, limite]) => {
+      const gasto = resumoMes.porCategoria.find((c) => c.id === catId)?.total || 0;
+      const pct = (gasto / limite) * 100;
+      if (pct >= 90) {
+        itens.push({
+          emoji: pct >= 100 ? "🚨" : "🎯",
+          texto: `Você já usou ${Math.round(pct)}% do orçamento de ${catLabel(catId)}.`,
+          tom: pct >= 100 ? "atencao" : "neutro",
+        });
+      }
+    });
+  }
 
   const mesesComDado = historicoMensal.filter((h) => h.receita > 0 || h.gastos > 0);
   if (mesesComDado.length >= 2) {

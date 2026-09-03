@@ -39,6 +39,8 @@ export interface Investimento {
    * Quando definida, o valor atual é calculado por juros compostos a partir
    * de `data` em vez de editado manualmente. */
   taxaMensal?: number;
+  /** Instituição/corretora onde o investimento está, opcional. */
+  instituicao?: string;
 }
 
 export type Metas = Record<string, number>;

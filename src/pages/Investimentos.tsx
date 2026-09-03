@@ -30,6 +30,8 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
   const [aportado, setAportado] = useState("");
   const [atual, setAtual] = useState("");
   const [taxaMensal, setTaxaMensal] = useState("");
+  const [dataAporte, setDataAporte] = useState(() => new Date().toISOString().slice(0, 10));
+  const [instituicao, setInstituicao] = useState("");
   const [editandoId, setEditandoId] = useState<string | null>(null);
 
   const ehCaixinha = tipo === "Caixinha";
@@ -39,6 +41,8 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
     setAportado("");
     setAtual("");
     setTaxaMensal("");
+    setDataAporte(new Date().toISOString().slice(0, 10));
+    setInstituicao("");
     setTipo(TIPOS_INVESTIMENTO[0]);
     setEditandoId(null);
   }
@@ -50,6 +54,8 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
     setAportado(String(inv.valorAportado).replace(".", ","));
     setAtual(String(inv.valorAtual).replace(".", ","));
     setTaxaMensal(inv.taxaMensal !== undefined ? String(inv.taxaMensal).replace(".", ",") : "");
+    setDataAporte(inv.data.slice(0, 10));
+    setInstituicao(inv.instituicao || "");
   }
 
   function valorAtualEfetivo(inv: Investimento): number {
@@ -62,23 +68,25 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
   function submeter(e: React.FormEvent) {
     e.preventDefault();
     const va = parseMoeda(aportado);
-    if (!nome.trim() || va === null || va <= 0) return;
+    if (!nome.trim() || va === null || va <= 0 || !dataAporte) return;
+    const dataISO = `${dataAporte}T12:00:00.000Z`;
+    const instituicaoCampo = instituicao.trim() || undefined;
 
     if (ehCaixinha) {
       const taxa = parseMoeda(taxaMensal);
       if (taxa === null || taxa < 0) return;
       if (editandoId) {
-        atualizarInvestimento(editandoId, { nome: nome.trim(), tipo, valorAportado: va, valorAtual: va, taxaMensal: taxa });
+        atualizarInvestimento(editandoId, { nome: nome.trim(), tipo, valorAportado: va, valorAtual: va, data: dataISO, taxaMensal: taxa, instituicao: instituicaoCampo });
       } else {
-        adicionarInvestimento({ nome: nome.trim(), tipo, valorAportado: va, valorAtual: va, data: new Date().toISOString(), taxaMensal: taxa });
+        adicionarInvestimento({ nome: nome.trim(), tipo, valorAportado: va, valorAtual: va, data: dataISO, taxaMensal: taxa, instituicao: instituicaoCampo });
       }
     } else {
       const vt = parseMoeda(atual);
       if (vt === null) return;
       if (editandoId) {
-        atualizarInvestimento(editandoId, { nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt, taxaMensal: undefined });
+        atualizarInvestimento(editandoId, { nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt, data: dataISO, taxaMensal: undefined, instituicao: instituicaoCampo });
       } else {
-        adicionarInvestimento({ nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt, data: new Date().toISOString() });
+        adicionarInvestimento({ nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt, data: dataISO, instituicao: instituicaoCampo });
       }
     }
     limparFormulario();
@@ -87,13 +95,14 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
   const totais = useMemo(() => {
     const totalAportado = investimentos.reduce((s, i) => s + i.valorAportado, 0);
     const totalAtual = investimentos.reduce((s, i) => s + valorAtualEfetivo(i), 0);
-    const rentabilidade = totalAportado > 0 ? ((totalAtual - totalAportado) / totalAportado) * 100 : 0;
+    const resultado = totalAtual - totalAportado;
+    const rentabilidade = totalAportado > 0 ? (resultado / totalAportado) * 100 : 0;
     const porTipo = TIPOS_INVESTIMENTO.map((t, i) => ({
       tipo: t,
       valor: investimentos.filter((inv) => inv.tipo === t).reduce((s, inv) => s + valorAtualEfetivo(inv), 0),
       cor: CORES_TIPO_INVESTIMENTO[i % CORES_TIPO_INVESTIMENTO.length],
     })).filter((t) => t.valor > 0);
-    return { totalAportado, totalAtual, rentabilidade, porTipo };
+    return { totalAportado, totalAtual, resultado, rentabilidade, porTipo };
   }, [investimentos]);
 
   return (
@@ -126,6 +135,12 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
               <input className="cf-num cf-focus" aria-label="Valor atual" value={atual} onChange={(e) => setAtual(e.target.value)} placeholder="valor atual" inputMode="decimal" style={campoInput} />
             )}
           </div>
+          <div style={{ flex: "1 1 130px" }}>
+            <input type="date" className="cf-focus" aria-label="Data do aporte" value={dataAporte} onChange={(e) => setDataAporte(e.target.value)} style={campoInput} />
+          </div>
+          <div style={{ flex: "1 1 140px" }}>
+            <input className="cf-focus" aria-label="Instituição ou corretora, opcional" value={instituicao} onChange={(e) => setInstituicao(e.target.value)} placeholder="instituição — opcional" style={campoInput} />
+          </div>
           <button type="submit" className="cf-btn cf-focus" style={botaoPrimario}>
             {editandoId ? "Salvar" : "Adicionar"}
           </button>
@@ -144,6 +159,13 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
               <div>
                 <div style={rotuloCampo}>valor atual</div>
                 <NumeroAnimado valor={totais.totalAtual} formatar={formatarMoeda} className="cf-num" style={{ fontSize: 19, fontWeight: 600 }} />
+              </div>
+              <div>
+                <div style={rotuloCampo}>resultado</div>
+                <div className="cf-num" style={{ fontSize: 19, fontWeight: 700, color: totais.resultado >= 0 ? "var(--verde)" : "var(--rust)" }}>
+                  {totais.resultado > 0 ? "+" : ""}
+                  {formatarMoeda(totais.resultado)}
+                </div>
               </div>
               <div>
                 <div style={rotuloCampo}>rentabilidade</div>
@@ -199,11 +221,12 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                   className="cf-linha"
                   style={{ display: "flex", alignItems: "center", gap: 12, rowGap: 6, flexWrap: "wrap", padding: "10px 0", borderBottom: "1px solid var(--paper-linha)" }}
                 >
-                  <div style={{ flex: "1 1 140px", minWidth: 0 }}>
+                  <div style={{ flex: "1 1 140px", minWidth: 0 }} title={`Aportado em ${new Date(inv.data).toLocaleDateString("pt-BR")}`}>
                     <div style={{ fontSize: 14.5 }}>{inv.nome}</div>
                     <div style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase" }}>
                       {inv.tipo}
                       {ehCaixinhaLinha && ` · ${formatarPct(inv.taxaMensal!)}/mês`}
+                      {inv.instituicao && ` · ${inv.instituicao}`}
                     </div>
                   </div>
                   {ehCaixinhaLinha ? (
