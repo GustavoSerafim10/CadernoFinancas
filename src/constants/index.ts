@@ -25,6 +25,7 @@ export const CATEGORIAS: Categoria[] = [
 ];
 
 export const TIPOS_INVESTIMENTO = [
+  "Caixinha",
   "Renda Fixa",
   "Ações",
   "FIIs",

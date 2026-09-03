@@ -35,6 +35,10 @@ export interface Investimento {
   valorAportado: number;
   valorAtual: number;
   data: string; // ISO 8601
+  /** Só pra tipo "Caixinha": rentabilidade mensal em % (ex: 0.8 = 0,8%/mês).
+   * Quando definida, o valor atual é calculado por juros compostos a partir
+   * de `data` em vez de editado manualmente. */
+  taxaMensal?: number;
 }
 
 export type Metas = Record<string, number>;

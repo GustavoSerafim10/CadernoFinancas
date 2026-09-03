@@ -29,4 +29,4 @@ export const COR_INVESTIDO = "#35D07F";
 export const COR_APOSTAS = "#C084FC";
 export const COR_ACCENT = "#7C6CF6";
 
-export const CORES_TIPO_INVESTIMENTO = ["#7C6CF6", "#35D07F", "#F2586B", "#F5B94B", "#60A5FA", "#94A3B8"];
+export const CORES_TIPO_INVESTIMENTO = ["#2DD4BF", "#7C6CF6", "#35D07F", "#F2586B", "#F5B94B", "#60A5FA", "#94A3B8"];

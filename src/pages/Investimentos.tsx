@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Investimento } from "../types";
 import { TIPOS_INVESTIMENTO } from "../constants";
 import { formatarMoeda, formatarPct, parseMoeda } from "../utils/format";
+import { calcularValorAtualCaixinha } from "../utils/caixinha";
 import { useOcultarSvgDecorativo } from "../hooks/useOcultarSvgDecorativo";
 import { IconeX, IconeEditar } from "../components/Icones";
 import { NumeroAnimado } from "../components/NumeroAnimado";
@@ -28,12 +29,16 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
   const [tipo, setTipo] = useState<string>(TIPOS_INVESTIMENTO[0]);
   const [aportado, setAportado] = useState("");
   const [atual, setAtual] = useState("");
+  const [taxaMensal, setTaxaMensal] = useState("");
   const [editandoId, setEditandoId] = useState<string | null>(null);
+
+  const ehCaixinha = tipo === "Caixinha";
 
   function limparFormulario() {
     setNome("");
     setAportado("");
     setAtual("");
+    setTaxaMensal("");
     setTipo(TIPOS_INVESTIMENTO[0]);
     setEditandoId(null);
   }
@@ -44,28 +49,48 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
     setTipo(inv.tipo);
     setAportado(String(inv.valorAportado).replace(".", ","));
     setAtual(String(inv.valorAtual).replace(".", ","));
+    setTaxaMensal(inv.taxaMensal !== undefined ? String(inv.taxaMensal).replace(".", ",") : "");
+  }
+
+  function valorAtualEfetivo(inv: Investimento): number {
+    if (inv.tipo === "Caixinha" && inv.taxaMensal !== undefined) {
+      return calcularValorAtualCaixinha(inv.valorAportado, inv.data, inv.taxaMensal);
+    }
+    return inv.valorAtual;
   }
 
   function submeter(e: React.FormEvent) {
     e.preventDefault();
     const va = parseMoeda(aportado);
-    const vt = parseMoeda(atual);
-    if (!nome.trim() || va === null || vt === null || va <= 0) return;
-    if (editandoId) {
-      atualizarInvestimento(editandoId, { nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt });
+    if (!nome.trim() || va === null || va <= 0) return;
+
+    if (ehCaixinha) {
+      const taxa = parseMoeda(taxaMensal);
+      if (taxa === null || taxa < 0) return;
+      if (editandoId) {
+        atualizarInvestimento(editandoId, { nome: nome.trim(), tipo, valorAportado: va, valorAtual: va, taxaMensal: taxa });
+      } else {
+        adicionarInvestimento({ nome: nome.trim(), tipo, valorAportado: va, valorAtual: va, data: new Date().toISOString(), taxaMensal: taxa });
+      }
     } else {
-      adicionarInvestimento({ nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt, data: new Date().toISOString() });
+      const vt = parseMoeda(atual);
+      if (vt === null) return;
+      if (editandoId) {
+        atualizarInvestimento(editandoId, { nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt, taxaMensal: undefined });
+      } else {
+        adicionarInvestimento({ nome: nome.trim(), tipo, valorAportado: va, valorAtual: vt, data: new Date().toISOString() });
+      }
     }
     limparFormulario();
   }
 
   const totais = useMemo(() => {
     const totalAportado = investimentos.reduce((s, i) => s + i.valorAportado, 0);
-    const totalAtual = investimentos.reduce((s, i) => s + i.valorAtual, 0);
+    const totalAtual = investimentos.reduce((s, i) => s + valorAtualEfetivo(i), 0);
     const rentabilidade = totalAportado > 0 ? ((totalAtual - totalAportado) / totalAportado) * 100 : 0;
     const porTipo = TIPOS_INVESTIMENTO.map((t, i) => ({
       tipo: t,
-      valor: investimentos.filter((inv) => inv.tipo === t).reduce((s, inv) => s + inv.valorAtual, 0),
+      valor: investimentos.filter((inv) => inv.tipo === t).reduce((s, inv) => s + valorAtualEfetivo(inv), 0),
       cor: CORES_TIPO_INVESTIMENTO[i % CORES_TIPO_INVESTIMENTO.length],
     })).filter((t) => t.valor > 0);
     return { totalAportado, totalAtual, rentabilidade, porTipo };
@@ -95,7 +120,11 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
             <input className="cf-num cf-focus" aria-label="Valor aportado" value={aportado} onChange={(e) => setAportado(e.target.value)} placeholder="aportado" inputMode="decimal" style={campoInput} />
           </div>
           <div style={{ flex: "1 1 110px" }}>
-            <input className="cf-num cf-focus" aria-label="Valor atual" value={atual} onChange={(e) => setAtual(e.target.value)} placeholder="valor atual" inputMode="decimal" style={campoInput} />
+            {ehCaixinha ? (
+              <input className="cf-num cf-focus" aria-label="Rentabilidade mensal em porcentagem" value={taxaMensal} onChange={(e) => setTaxaMensal(e.target.value)} placeholder="rentabilidade % ao mês" inputMode="decimal" style={campoInput} />
+            ) : (
+              <input className="cf-num cf-focus" aria-label="Valor atual" value={atual} onChange={(e) => setAtual(e.target.value)} placeholder="valor atual" inputMode="decimal" style={campoInput} />
+            )}
           </div>
           <button type="submit" className="cf-btn cf-focus" style={botaoPrimario}>
             {editandoId ? "Salvar" : "Adicionar"}
@@ -157,8 +186,10 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
           <section>
             <div style={rotuloCampo}>posições</div>
             {investimentos.map((inv, i) => {
-              const rent = inv.valorAportado > 0 ? ((inv.valorAtual - inv.valorAportado) / inv.valorAportado) * 100 : 0;
-              const rotulo = `${inv.nome}, ${inv.tipo}, ${formatarMoeda(inv.valorAtual)}`;
+              const ehCaixinhaLinha = inv.tipo === "Caixinha" && inv.taxaMensal !== undefined;
+              const valorAtual = valorAtualEfetivo(inv);
+              const rent = inv.valorAportado > 0 ? ((valorAtual - inv.valorAportado) / inv.valorAportado) * 100 : 0;
+              const rotulo = `${inv.nome}, ${inv.tipo}, ${formatarMoeda(valorAtual)}`;
               return (
                 <motion.div
                   key={inv.id}
@@ -170,19 +201,32 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                 >
                   <div style={{ flex: "1 1 140px", minWidth: 0 }}>
                     <div style={{ fontSize: 14.5 }}>{inv.nome}</div>
-                    <div style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase" }}>{inv.tipo}</div>
+                    <div style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase" }}>
+                      {inv.tipo}
+                      {ehCaixinhaLinha && ` · ${formatarPct(inv.taxaMensal!)}/mês`}
+                    </div>
                   </div>
-                  <input
-                    key={`${inv.id}-${inv.valorAtual}`}
-                    className="cf-num cf-focus"
-                    aria-label={`Valor atual de ${inv.nome}`}
-                    defaultValue={inv.valorAtual}
-                    onBlur={(e) => {
-                      const v = parseMoeda(e.target.value);
-                      if (v !== null) atualizarInvestimento(inv.id, { valorAtual: v });
-                    }}
-                    style={{ ...campoInput, width: 100, textAlign: "right" }}
-                  />
+                  {ehCaixinhaLinha ? (
+                    <span
+                      className="cf-num"
+                      aria-label={`Valor atual de ${inv.nome}`}
+                      style={{ ...campoInput, width: 100, textAlign: "right", display: "inline-block", border: "1px solid transparent" }}
+                    >
+                      {formatarMoeda(valorAtual)}
+                    </span>
+                  ) : (
+                    <input
+                      key={`${inv.id}-${inv.valorAtual}`}
+                      className="cf-num cf-focus"
+                      aria-label={`Valor atual de ${inv.nome}`}
+                      defaultValue={inv.valorAtual}
+                      onBlur={(e) => {
+                        const v = parseMoeda(e.target.value);
+                        if (v !== null) atualizarInvestimento(inv.id, { valorAtual: v });
+                      }}
+                      style={{ ...campoInput, width: 100, textAlign: "right" }}
+                    />
+                  )}
                   <span className="cf-num" style={{ fontSize: 13, minWidth: 64, textAlign: "right", color: rent >= 0 ? "var(--verde)" : "var(--rust)" }}>
                     {formatarPct(rent)}
                   </span>
