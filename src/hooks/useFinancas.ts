@@ -36,18 +36,23 @@ export function useFinancas(monthKey: string) {
   const [apostas, setApostas] = useState<Aposta[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [primeiroAcesso, setPrimeiroAcesso] = useState(false);
 
   useEffect(() => {
     async function init() {
       setCarregando(true);
       try {
-        let contasCarregadas = (await getItem<Conta[]>("contas")) || [];
+        const contasRaw = await getItem<Conta[]>("contas");
+        const transacoesRaw = await getItem<Transacao[]>("transacoes");
+        setPrimeiroAcesso(contasRaw === null && transacoesRaw === null);
+
+        let contasCarregadas = contasRaw || [];
         if (contasCarregadas.length === 0) {
           contasCarregadas = [{ id: "principal", nome: "Conta Principal", cor: "#20303F" }];
           await setItem("contas", contasCarregadas);
         }
         setContas(contasCarregadas);
-        setTransacoes((await getItem<Transacao[]>("transacoes")) || []);
+        setTransacoes(transacoesRaw || []);
         setRecorrencias((await getItem<Recorrencia[]>("recorrencias")) || []);
         setMetas((await getItem<Metas>("metas")) || {});
         setInvestimentos((await getItem<Investimento[]>("investimentos")) || []);
@@ -283,7 +288,7 @@ export function useFinancas(monthKey: string) {
   const insights = useMemo(() => calcularInsights(transacoes, monthKey), [transacoes, monthKey]);
 
   return {
-    contas, transacoes, recorrencias, metas, investimentos, apostas, carregando, erro,
+    contas, transacoes, recorrencias, metas, investimentos, apostas, carregando, erro, primeiroAcesso,
     transacoesDoMes, resumoMes, resumoMesAnterior, historicoMensal, insights,
     apostasDoMes, resumoApostas,
     adicionarTransacao, removerTransacao, editarTransacao,

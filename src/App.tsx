@@ -2,8 +2,8 @@ import { useState, Suspense, lazy } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { TopTabs } from "./components/TopTabs";
 import { SeletorMes } from "./components/SeletorMes";
-import { IconeSino, IconeDownload } from "./components/Icones";
-import { botaoSecundario } from "./components/estilosComuns";
+import { IconeSino, IconeDownload, IconeX } from "./components/Icones";
+import { botaoSecundario, cartaoEstilo } from "./components/estilosComuns";
 import { CosmicBackground } from "./components/CosmicBackground";
 import { FinanceHud } from "./components/FinanceHud";
 import { useFinancas } from "./hooks/useFinancas";
@@ -21,6 +21,7 @@ const Insights = lazy(() => import("./pages/Insights").then((m) => ({ default: m
 export default function App() {
   const [refDate, setRefDate] = useState(new Date());
   const [pagina, setPagina] = useState<PaginaId>("dashboard");
+  const [avisoOrigemDispensado, setAvisoOrigemDispensado] = useState(false);
   const monthKey = chaveDoMes(refDate);
   const financas = useFinancas(monthKey);
 
@@ -117,6 +118,36 @@ export default function App() {
         />
 
         {financas.erro && <div className="erro">{financas.erro}</div>}
+
+        {financas.primeiroAcesso && !avisoOrigemDispensado && (
+          <div
+            style={{
+              ...cartaoEstilo,
+              padding: "12px 16px",
+              borderColor: "var(--rust)",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 20,
+              fontSize: 13.5,
+            }}
+          >
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--rust)", flex: "0 0 auto" }} />
+            <span style={{ flex: 1 }}>
+              Não encontramos nenhum dado salvo neste endereço. Se você já usou o app antes, confira se está no mesmo
+              navegador e na mesma URL de sempre (<span className="cf-num">http://localhost:5173</span>) — o
+              histórico fica salvo só ali, não sincroniza entre navegadores nem portas diferentes.
+            </span>
+            <button
+              onClick={() => setAvisoOrigemDispensado(true)}
+              className="cf-focus"
+              aria-label="Dispensar aviso"
+              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-soft)", flex: "0 0 auto", display: "flex" }}
+            >
+              <IconeX />
+            </button>
+          </div>
+        )}
 
         {financas.carregando ? (
           <div className="carregando">carregando seus dados…</div>
