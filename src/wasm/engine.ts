@@ -18,7 +18,7 @@ let enginePromise: Promise<NightfolioEngineExports> | null = null;
 async function carregarEngine(): Promise<NightfolioEngineExports> {
   if (!enginePromise) {
     enginePromise = (async () => {
-      const url = "/wasm/nightfolio-engine.wasm";
+      const url = `${import.meta.env.BASE_URL}wasm/nightfolio-engine.wasm`;
       let resultado: WebAssembly.WebAssemblyInstantiatedSource;
       try {
         resultado = await WebAssembly.instantiateStreaming(fetch(url));

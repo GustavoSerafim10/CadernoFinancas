@@ -30,6 +30,19 @@ npm run build
 npm run preview
 ```
 
+> A build de produção usa `base: "/CadernoFinancas/"` (necessário pro
+> GitHub Pages, que serve o site num subcaminho) — então o `npm run
+> preview` abre em `http://localhost:4173/CadernoFinancas/`, não na raiz.
+> Em `npm run dev` isso não se aplica, continua servindo da raiz normal.
+
+## Deploy
+
+O site fica publicado em **https://gustavoserafim10.github.io/CadernoFinancas/**
+via GitHub Pages, com deploy automático a cada push na `main`
+(`.github/workflows/deploy.yml`): builda com `npm run build` e publica o
+`dist/` gerado. Não precisa de nenhum serviço/conta externa — usa só o
+GitHub Actions do próprio repositório.
+
 > **Por que a porta é fixa (`strictPort: true` no `vite.config.ts`)**: os
 > dados ficam em `localStorage`, que é isolado por origem (protocolo + host
 > + porta). Se o Vite subisse em portas diferentes em dias diferentes (o
