@@ -157,8 +157,8 @@ export function Apostas({
                 className="cf-linha"
                 style={{ padding: "10px 0", borderBottom: "1px solid var(--paper-linha)" }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ flex: 1, fontSize: 14.5 }}>{a.descricao}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, rowGap: 8, flexWrap: "wrap" }}>
+                  <span style={{ flex: "1 1 140px", minWidth: 0, fontSize: 14.5 }}>{a.descricao}</span>
                   <span style={badgeEstilo(corStatus)}>{rotuloStatus}</span>
                   <span className="cf-num" style={{ fontSize: 13, color: "var(--ink-soft)", minWidth: 84, textAlign: "right" }}>
                     {formatarMoeda(a.valorApostado)}
@@ -210,7 +210,7 @@ export function Apostas({
                 </div>
 
                 {resolvendoGanhoId === a.id && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, marginLeft: 19 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, rowGap: 8, flexWrap: "wrap", marginTop: 10, marginLeft: 19 }}>
                     <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>voltou quanto no total?</span>
                     <input
                       autoFocus

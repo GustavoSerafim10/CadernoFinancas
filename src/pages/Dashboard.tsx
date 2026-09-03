@@ -305,7 +305,7 @@ export function Dashboard({
         </Painel>
       </section>
 
-      <section style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 20 }}>
+      <section className="cf-grid-3" style={{ marginBottom: 20 }}>
         <Painel titulo="Gastos por Categoria">
           {resumoMes.porCategoria.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
@@ -478,7 +478,7 @@ export function Dashboard({
         </Painel>
       </section>
 
-      <section style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20 }}>
+      <section className="cf-grid-2">
         <Painel titulo="Gastos por Categoria (Comparativo)">
           {comparativoCategorias.length > 0 ? (
             <>

@@ -112,6 +112,98 @@ body {
   z-index: 1;
 }
 
+.cf-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 76px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 0;
+  background: rgba(10, 10, 15, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid var(--border);
+}
+
+.cf-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.cf-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.cf-tabs-lista {
+  display: flex;
+  gap: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cf-tabs-lista::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .cf-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .cf-grid-3,
+  .cf-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .conteudo {
+    padding: 20px 16px 88px 16px;
+  }
+
+  .cf-sidebar {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: auto;
+    height: 60px;
+    flex-direction: row;
+    justify-content: space-evenly;
+    padding: 0 8px;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .cf-sidebar-logo {
+    display: none;
+  }
+
+  .cf-sidebar button {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .cf-sidebar button span {
+    transform: scale(1.25) !important;
+  }
+
+  .cf-tabs-lista {
+    gap: 18px;
+  }
+
+  .cf-finance-hud {
+    display: none;
+  }
+}
+
 .eyebrow {
   font-size: 12px;
   letter-spacing: 0.14em;
@@ -262,6 +354,12 @@ body {
 .cf-linha:hover .cf-linha-remover,
 .cf-linha:focus-within .cf-linha-remover {
   opacity: 1;
+}
+
+@media (hover: none) {
+  .cf-linha-remover {
+    opacity: 1;
+  }
 }
 
 .cf-tab {

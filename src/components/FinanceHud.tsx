@@ -74,7 +74,7 @@ function Candlestick() {
 
 export function FinanceHud() {
   return (
-    <div aria-hidden="true" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+    <div aria-hidden="true" className="cf-finance-hud" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
       <div
         style={{
           position: "absolute",

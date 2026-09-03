@@ -21,26 +21,8 @@ const ICONES: Record<PaginaId, () => React.ReactElement> = {
 
 export function Sidebar({ pagina, setPagina }: Props) {
   return (
-    <nav
-      style={{
-        position: "fixed",
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: 76,
-        zIndex: 2,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 6,
-        padding: "20px 0",
-        background: "rgba(10, 10, 15, 0.55)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        borderRight: "1px solid var(--border)",
-      }}
-    >
-      <div style={{ marginBottom: 18 }} title="Nightfolio">
+    <nav className="cf-sidebar">
+      <div className="cf-sidebar-logo" style={{ marginBottom: 18 }} title="Nightfolio">
         <svg width="30" height="30" viewBox="0 0 32 32">
           <rect width="32" height="32" rx="8" fill="#0a0a0f" />
           <path d="M21 5a12 12 0 1 0 6 20A10 10 0 0 1 21 5Z" fill="#7c6cf6" />

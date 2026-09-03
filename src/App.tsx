@@ -104,7 +104,7 @@ export default function App() {
           setPagina={setPagina}
           right={
             pagina === "dashboard" ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, rowGap: 10, flexWrap: "wrap" }}>
                 <SeletorMes refDate={refDate} mudarMes={mudarMes} semMargem />
                 <button onClick={exportarCSV} className="cf-focus" style={{ ...botaoSecundario, fontSize: 12, display: "flex", alignItems: "center", gap: 7 }}>
                   <IconeDownload /> Exportar CSV

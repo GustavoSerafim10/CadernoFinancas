@@ -157,9 +157,9 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, delay: i * 0.03 }}
                   className="cf-linha"
-                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid var(--paper-linha)" }}
+                  style={{ display: "flex", alignItems: "center", gap: 12, rowGap: 6, flexWrap: "wrap", padding: "10px 0", borderBottom: "1px solid var(--paper-linha)" }}
                 >
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: "1 1 140px", minWidth: 0 }}>
                     <div style={{ fontSize: 14.5 }}>{inv.nome}</div>
                     <div style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase" }}>{inv.tipo}</div>
                   </div>

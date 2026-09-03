@@ -21,7 +21,7 @@ export function TopTabs({ pagina, setPagina, right }: Props) {
         borderBottom: "1px solid var(--border)",
       }}
     >
-      <div style={{ display: "flex", gap: 28 }}>
+      <div className="cf-tabs-lista">
         {PAGINAS.map((p) => {
           const ativa = pagina === p.id;
           return (
@@ -39,6 +39,8 @@ export function TopTabs({ pagina, setPagina, right }: Props) {
                 fontSize: 13.5,
                 fontWeight: 600,
                 color: ativa ? "var(--ink)" : "var(--ink-soft)",
+                flex: "0 0 auto",
+                whiteSpace: "nowrap",
               }}
             >
               {p.label}

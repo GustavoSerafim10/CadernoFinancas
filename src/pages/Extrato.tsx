@@ -227,8 +227,8 @@ export function Extrato({
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
                   {recorrencias.map((r) => (
-                    <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, padding: "6px 0", borderBottom: "1px solid var(--paper-linha)" }}>
-                      <span style={{ flex: 1, opacity: r.ativa ? 1 : 0.5 }}>{r.descricao} · dia {r.diaDoMes}</span>
+                    <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 10, rowGap: 6, flexWrap: "wrap", fontSize: 13, padding: "6px 0", borderBottom: "1px solid var(--paper-linha)" }}>
+                      <span style={{ flex: "1 1 140px", minWidth: 0, opacity: r.ativa ? 1 : 0.5 }}>{r.descricao} · dia {r.diaDoMes}</span>
                       <span className="cf-num" style={{ opacity: r.ativa ? 1 : 0.5 }}>{formatarMoeda(r.valor)}</span>
                       <button onClick={() => toggleRecorrencia(r.id)} className="cf-focus" style={{ ...botaoSecundario, padding: "3px 10px", fontSize: 11.5 }}>
                         {r.ativa ? "pausar" : "ativar"}
@@ -279,10 +279,10 @@ export function Extrato({
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.22, delay: i * 0.02 }}
                   className="cf-linha"
-                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "9px 0", borderBottom: "1px solid var(--paper-linha)" }}
+                  style={{ display: "flex", alignItems: "center", gap: 12, rowGap: 6, flexWrap: "wrap", padding: "9px 0", borderBottom: "1px solid var(--paper-linha)" }}
                 >
                   <span style={{ width: 7, height: 7, borderRadius: "50%", background: isReceita ? "var(--ink)" : isInv ? "var(--verde)" : catCor(t.categoria), flex: "0 0 auto" }} />
-                  <span style={{ flex: 1, fontSize: 14.5 }}>{t.descricao}</span>
+                  <span style={{ flex: "1 1 140px", fontSize: 14.5, minWidth: 0 }}>{t.descricao}</span>
                   <span style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase" }}>
                     {contas.find((c) => c.id === t.contaId)?.nome || "—"}
                   </span>
