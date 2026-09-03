@@ -107,8 +107,15 @@ export default function App() {
     );
     if (!confirmado) return;
 
-    for (const chave of chavesEsperadas) {
-      await setItem(chave, dados[chave]);
+    try {
+      for (const chave of chavesEsperadas) {
+        await setItem(chave, dados[chave]);
+      }
+    } catch {
+      setErroImportacao(
+        "Não consegui salvar os dados importados (o armazenamento do navegador pode estar cheio ou em modo privado). A importação pode ter ficado incompleta — recarregue a página e confira antes de continuar usando."
+      );
+      return;
     }
     window.location.reload();
   }
