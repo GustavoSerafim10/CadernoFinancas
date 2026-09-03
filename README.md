@@ -12,6 +12,16 @@ premium — responsivo (desktop → mobile) e acessível (WCAG 2.0/2.1 A+AA).
 **Stack**: React 18 + TypeScript (strict) + Vite 6 + Recharts + Framer Motion,
 mais um módulo em **Rust → WebAssembly** pra simulação de juros compostos.
 
+![Dashboard](docs/screenshots/dashboard.png)
+
+<details>
+<summary>Mais telas (Investimentos, Insights)</summary>
+
+![Investimentos](docs/screenshots/investimentos.png)
+![Insights](docs/screenshots/insights.png)
+
+</details>
+
 ## Rodando localmente
 
 ```bash
@@ -82,15 +92,22 @@ scripts/
   principal, evolução do saldo acumulado, distribuição por categoria e
   últimos lançamentos.
 - **Extrato** — lançar receitas/gastos/investimentos, recorrências, contas.
-- **Investimentos** — carteira com rentabilidade por posição e por tipo.
+- **Investimentos** — carteira com total aportado, valor atual, resultado
+  (R$) e rentabilidade (%), por posição e por tipo. Tipo especial
+  **Caixinha**: em vez de digitar o valor atual à mão, guarda a
+  rentabilidade mensal (%) e o valor cresce sozinho por juros compostos
+  a partir da data do aporte — igual o banco fecha o rendimento todo mês,
+  calculado na hora de exibir, sem precisar de atualização manual nem
+  ficar desatualizado. Campo opcional de instituição/corretora.
 - **Operações** — apostas esportivas: registra, resolve (ganhou/perdeu) e o
   resultado líquido entra automaticamente no saldo do mês.
 - **Simulador** — projeção de juros compostos, calculada em Rust/WASM.
 - **Metas** — limite de gasto por categoria, com progresso.
-- **Insights** — leituras automáticas do mês (variação de gastos, taxa de
-  poupança, categoria que mais pesa, proximidade do orçamento, projeção de
-  reserva), geradas por regras determinísticas sobre os próprios dados —
-  sem depender de IA.
+- **Insights** — leituras automáticas do mês (variação de gastos, saldo
+  livre vs. receita, categoria que mais pesa, gastos recorrentes
+  projetados no ano, proximidade do orçamento, projeção de reserva),
+  geradas por regras determinísticas sobre os próprios dados — sem
+  depender de IA. A página deixa isso explícito no cabeçalho.
 
 ## O motor Rust/WebAssembly
 
@@ -172,7 +189,11 @@ Os dados ficam salvos no `localStorage` do navegador (arquivo
   do app.
 
 Use os botões de exportar (CSV do mês / JSON completo) no Dashboard para
-fazer backup manual enquanto isso.
+fazer backup manual enquanto isso, e **Importar JSON** pra restaurar —
+substitui todos os dados do navegador pelos do arquivo, com confirmação
+antes de aplicar. A importação valida a estrutura do arquivo e, se algo
+falhar no meio do processo (armazenamento cheio, modo privado), avisa em
+vez de deixar os dados num estado inconsistente sem explicação.
 
 ## Próximos passos possíveis
 
