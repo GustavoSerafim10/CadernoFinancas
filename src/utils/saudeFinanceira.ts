@@ -38,10 +38,12 @@ export function calcularSaudeFinanceira(
   const taxaPoupanca = resumoMes.receita > 0 ? resumoMes.saldo / resumoMes.receita : 0;
   const scorePoupanca = Math.max(0, Math.min(100, (taxaPoupanca / 0.4) * 100));
   fatores.push({
-    label: "Taxa de poupança",
+    label: "Saldo livre",
     detalhe:
       resumoMes.receita > 0
-        ? `Você guardou ${Math.round(taxaPoupanca * 100)}% da renda este mês`
+        ? taxaPoupanca >= 0
+          ? `Sobrou ${Math.round(taxaPoupanca * 100)}% da renda este mês, ainda sem destino`
+          : `Gastos superaram a renda em ${Math.round(Math.abs(taxaPoupanca) * 100)}% este mês`
         : "Sem receita lançada este mês ainda",
     pontos: Math.round((scorePoupanca / 100) * PESO_POUPANCA),
     maxPontos: PESO_POUPANCA,

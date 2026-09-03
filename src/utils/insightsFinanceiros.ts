@@ -41,7 +41,7 @@ export function calcularInsightsFinanceiros(
       emoji: taxa >= 0 ? "💰" : "⚠️",
       texto:
         taxa >= 0
-          ? `Você guardou ${Math.round(taxa)}% da sua renda este mês.`
+          ? `Sobrou ${Math.round(taxa)}% da sua renda este mês, ainda sem destino.`
           : `Seus gastos superaram a renda em ${Math.round(Math.abs(taxa))}% este mês.`,
       tom: taxa >= 20 ? "positivo" : taxa >= 0 ? "neutro" : "atencao",
     });
