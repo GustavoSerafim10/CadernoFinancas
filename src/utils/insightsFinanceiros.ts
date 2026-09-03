@@ -1,0 +1,99 @@
+import { ResumoMes, PontoHistorico, Metas, ResumoApostas } from "../types";
+import { catLabel } from "../constants";
+import { formatarMoeda } from "./format";
+
+export interface InsightItem {
+  emoji: string;
+  texto: string;
+  tom: "positivo" | "atencao" | "neutro";
+}
+
+/**
+ * Gera mensagens de insight a partir de regras matemáticas simples sobre os
+ * dados já calculados no hook — sem IA. Cada regra só entra na lista quando
+ * há dado suficiente pra ela fazer sentido (ex: comparação com mês anterior
+ * exige que o mês anterior tenha alguma despesa lançada).
+ */
+export function calcularInsightsFinanceiros(
+  resumoMes: ResumoMes,
+  resumoMesAnterior: ResumoMes,
+  historicoMensal: PontoHistorico[],
+  metas: Metas,
+  resumoApostas: ResumoApostas
+): InsightItem[] {
+  const itens: InsightItem[] = [];
+
+  if (resumoMesAnterior.gastos > 0) {
+    const variacao = ((resumoMes.gastos - resumoMesAnterior.gastos) / resumoMesAnterior.gastos) * 100;
+    if (Math.abs(variacao) >= 3) {
+      itens.push({
+        emoji: variacao < 0 ? "💡" : "⚠️",
+        texto: `Seus gastos ${variacao < 0 ? "caíram" : "subiram"} ${Math.round(Math.abs(variacao))}% em relação ao mês anterior.`,
+        tom: variacao < 0 ? "positivo" : "atencao",
+      });
+    }
+  }
+
+  if (resumoMes.receita > 0) {
+    const taxa = (resumoMes.saldo / resumoMes.receita) * 100;
+    itens.push({
+      emoji: taxa >= 0 ? "💰" : "⚠️",
+      texto:
+        taxa >= 0
+          ? `Você guardou ${Math.round(taxa)}% da sua renda este mês.`
+          : `Seus gastos superaram a renda em ${Math.round(Math.abs(taxa))}% este mês.`,
+      tom: taxa >= 20 ? "positivo" : taxa >= 0 ? "neutro" : "atencao",
+    });
+  }
+
+  const totalGastos = resumoMes.porCategoria.reduce((s, c) => s + c.total, 0);
+  if (totalGastos > 0) {
+    const maior = [...resumoMes.porCategoria].sort((a, b) => b.total - a.total)[0];
+    const pct = Math.round((maior.total / totalGastos) * 100);
+    itens.push({
+      emoji: "📊",
+      texto: `${maior.label} representa ${pct}% das suas despesas este mês.`,
+      tom: pct >= 40 ? "atencao" : "neutro",
+    });
+  }
+
+  Object.entries(metas).forEach(([catId, limite]) => {
+    if (limite <= 0) return;
+    const gasto = resumoMes.porCategoria.find((c) => c.id === catId)?.total || 0;
+    const pct = (gasto / limite) * 100;
+    if (pct >= 90) {
+      itens.push({
+        emoji: pct >= 100 ? "🚨" : "🎯",
+        texto: `Você já usou ${Math.round(pct)}% do orçamento de ${catLabel(catId)}.`,
+        tom: pct >= 100 ? "atencao" : "neutro",
+      });
+    }
+  });
+
+  const mesesComDado = historicoMensal.filter((h) => h.receita > 0 || h.gastos > 0);
+  if (mesesComDado.length >= 2) {
+    const saldos = mesesComDado.map((h) => h.receita - h.gastos - h.investido + h.lucroApostas);
+    const acumulado = saldos.reduce((s, v) => s + v, 0);
+    const media = acumulado / saldos.length;
+    const alvo = 5000;
+    const faltam = alvo - acumulado;
+    if (media > 0 && faltam > 0) {
+      const meses = Math.ceil(faltam / media);
+      itens.push({
+        emoji: "📈",
+        texto: `Mantendo a média de ${formatarMoeda(media)}/mês, você pode acumular R$ 5.000 em aproximadamente ${meses} ${meses === 1 ? "mês" : "meses"}.`,
+        tom: "positivo",
+      });
+    }
+  }
+
+  if (resumoApostas.ganhas + resumoApostas.perdidas > 0) {
+    itens.push({
+      emoji: resumoApostas.lucro >= 0 ? "🎲" : "⚠️",
+      texto: `Suas operações resolvidas este mês tiveram ${Math.round(resumoApostas.taxaAcerto)}% de acerto, com lucro líquido de ${formatarMoeda(resumoApostas.lucro)}.`,
+      tom: resumoApostas.lucro >= 0 ? "positivo" : "atencao",
+    });
+  }
+
+  return itens;
+}

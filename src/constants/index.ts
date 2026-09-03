@@ -38,7 +38,7 @@ export const MESES = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
-export type PaginaId = "dashboard" | "extrato" | "investimentos" | "apostas" | "simulador" | "metas";
+export type PaginaId = "dashboard" | "extrato" | "investimentos" | "apostas" | "simulador" | "metas" | "insights";
 
 export interface PaginaDef {
   id: PaginaId;
@@ -49,9 +49,10 @@ export const PAGINAS: PaginaDef[] = [
   { id: "dashboard", label: "Dashboard" },
   { id: "extrato", label: "Extrato" },
   { id: "investimentos", label: "Investimentos" },
-  { id: "apostas", label: "Apostas" },
+  { id: "apostas", label: "Operações" },
   { id: "simulador", label: "Simulador" },
   { id: "metas", label: "Metas" },
+  { id: "insights", label: "Insights" },
 ];
 
 export function catLabel(id: string | null): string {

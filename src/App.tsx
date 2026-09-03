@@ -16,6 +16,7 @@ import { Metas } from "./pages/Metas";
 const Dashboard = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })));
 const Investimentos = lazy(() => import("./pages/Investimentos").then((m) => ({ default: m.Investimentos })));
 const Simulador = lazy(() => import("./pages/Simulador").then((m) => ({ default: m.Simulador })));
+const Insights = lazy(() => import("./pages/Insights").then((m) => ({ default: m.Insights })));
 
 export default function App() {
   const [refDate, setRefDate] = useState(new Date());
@@ -130,6 +131,7 @@ export default function App() {
                 transacoesDoMes={financas.transacoesDoMes}
                 insights={financas.insights}
                 resumoApostas={financas.resumoApostas}
+                metas={financas.metas}
                 setPagina={setPagina}
               />
             ) : pagina === "extrato" ? (
@@ -170,12 +172,20 @@ export default function App() {
               />
             ) : pagina === "simulador" ? (
               <Simulador />
-            ) : (
+            ) : pagina === "metas" ? (
               <Metas
                 metas={financas.metas}
                 setMetaCategoria={financas.setMetaCategoria}
                 resumoMes={financas.resumoMes}
                 refDate={refDate}
+              />
+            ) : (
+              <Insights
+                resumoMes={financas.resumoMes}
+                resumoMesAnterior={financas.resumoMesAnterior}
+                historicoMensal={financas.historicoMensal}
+                metas={financas.metas}
+                resumoApostas={financas.resumoApostas}
               />
             )}
           </Suspense>

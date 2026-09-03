@@ -4,11 +4,13 @@ import {
   ComposedChart, Bar, BarChart, Line, Area, AreaChart, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList,
 } from "recharts";
-import { ResumoMes, PontoHistorico, Insight, ResumoApostas, Transacao } from "../types";
+import { ResumoMes, PontoHistorico, Insight, ResumoApostas, Transacao, Metas } from "../types";
 import { MESES, catLabel, PaginaId } from "../constants";
 import { formatarMoeda, formatarPct } from "../utils/format";
 import { KpiCard } from "../components/KpiCard";
 import { Painel } from "../components/Painel";
+import { CardSaudeFinanceira } from "../components/CardSaudeFinanceira";
+import { calcularSaudeFinanceira } from "../utils/saudeFinanceira";
 import { IconeCarteira, IconeCartao, IconeInvestimentos, IconeApostas, IconeSaldo } from "../components/Icones";
 import { rotuloCampo, cartaoEstilo } from "../components/estilosComuns";
 import {
@@ -24,6 +26,7 @@ interface Props {
   transacoesDoMes: Transacao[];
   insights: Insight[];
   resumoApostas: ResumoApostas;
+  metas: Metas;
   setPagina: (p: PaginaId) => void;
 }
 
@@ -116,8 +119,12 @@ const SEM_DADOS: CSSProperties = {
 
 export function Dashboard({
   refDate, resumoMes, resumoMesAnterior, historicoMensal, transacoesDoMes,
-  insights, resumoApostas, setPagina,
+  insights, resumoApostas, metas, setPagina,
 }: Props) {
+  const saude = useMemo(
+    () => calcularSaudeFinanceira(resumoMes, resumoMesAnterior, metas),
+    [resumoMes, resumoMesAnterior, metas]
+  );
   const historicoComLabel = historicoMensal.map((h) => {
     const [ano, mes] = h.chave.split("-");
     return {
@@ -256,6 +263,48 @@ export function Dashboard({
         />
       </section>
 
+      <CardSaudeFinanceira saude={saude} />
+
+      <section style={{ marginBottom: 20 }}>
+        <Painel titulo="Fluxo de Caixa Mensal" acao={<span className="cf-pill-decorativo">Últimos 12 meses ⌄</span>}>
+          {historicoComLabel.length > 1 ? (
+            <>
+              <div style={{ display: "flex", gap: 14, marginBottom: 12, fontSize: 12, color: "var(--ink-soft)", flexWrap: "wrap" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 2, background: COR_INVESTIDO, display: "inline-block" }} />receita
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 2, background: COR_GASTOS, display: "inline-block" }} />gastos
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 12, height: 1.5, background: COR_ACCENT, display: "inline-block" }} />saldo
+                </span>
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <ComposedChart data={historicoComLabel} margin={{ top: 4, right: 4, left: -12, bottom: 0 }}>
+                  <CartesianGrid stroke={CHART_GRID} vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    tick={(props) => (
+                      <TickMesAtual {...props} ultimoLabel={historicoComLabel[historicoComLabel.length - 1]?.label || ""} />
+                    )}
+                    axisLine={{ stroke: CHART_AXIS_LINE }}
+                    tickLine={false}
+                  />
+                  <YAxis tick={{ fill: CHART_AXIS_TEXT, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatarEixoValor} />
+                  <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
+                  <Bar dataKey="receita" name="Receita" fill={COR_INVESTIDO} radius={[4, 4, 0, 0]} barSize={16} />
+                  <Bar dataKey="gastos" name="Gastos" fill={COR_GASTOS} radius={[4, 4, 0, 0]} barSize={16} />
+                  <Line dataKey="saldo" name="Saldo" stroke={COR_ACCENT} strokeWidth={2} dot={{ r: 3, fill: COR_ACCENT }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </>
+          ) : (
+            <div style={SEM_DADOS}>Histórico insuficiente ainda.</div>
+          )}
+        </Painel>
+      </section>
+
       <section style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 20 }}>
         <Painel titulo="Gastos por Categoria">
           {resumoMes.porCategoria.length > 0 ? (
@@ -316,44 +365,6 @@ export function Dashboard({
           )}
         </Painel>
 
-        <Painel titulo="Fluxo de Caixa Mensal" acao={<span className="cf-pill-decorativo">Últimos 12 meses ⌄</span>}>
-          {historicoComLabel.length > 1 ? (
-            <>
-              <div style={{ display: "flex", gap: 12, marginBottom: 8, fontSize: 11, color: "var(--ink-soft)", flexWrap: "wrap" }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_INVESTIDO, display: "inline-block" }} />receita
-                </span>
-                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 7, height: 7, borderRadius: 2, background: COR_GASTOS, display: "inline-block" }} />gastos
-                </span>
-                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 10, height: 1.5, background: COR_ACCENT, display: "inline-block" }} />saldo
-                </span>
-              </div>
-              <ResponsiveContainer width="100%" height={170}>
-                <ComposedChart data={historicoComLabel} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
-                  <CartesianGrid stroke={CHART_GRID} vertical={false} />
-                  <XAxis
-                    dataKey="label"
-                    tick={(props) => (
-                      <TickMesAtual {...props} ultimoLabel={historicoComLabel[historicoComLabel.length - 1]?.label || ""} />
-                    )}
-                    axisLine={{ stroke: CHART_AXIS_LINE }}
-                    tickLine={false}
-                  />
-                  <YAxis tick={{ fill: CHART_AXIS_TEXT, fontSize: 10.5 }} axisLine={false} tickLine={false} tickFormatter={formatarEixoValor} />
-                  <Tooltip formatter={(v: number) => formatarMoeda(v)} contentStyle={CHART_TOOLTIP_STYLE} itemStyle={CHART_TOOLTIP_ITEM_STYLE} labelStyle={CHART_TOOLTIP_LABEL_STYLE} />
-                  <Bar dataKey="receita" name="Receita" fill={COR_INVESTIDO} radius={[3, 3, 0, 0]} barSize={10} />
-                  <Bar dataKey="gastos" name="Gastos" fill={COR_GASTOS} radius={[3, 3, 0, 0]} barSize={10} />
-                  <Line dataKey="saldo" name="Saldo" stroke={COR_ACCENT} strokeWidth={1.75} dot={{ r: 2.5, fill: COR_ACCENT }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </>
-          ) : (
-            <div style={SEM_DADOS}>Histórico insuficiente ainda.</div>
-          )}
-        </Painel>
-
         <Painel titulo="Evolução do saldo">
           {saldoAcumulado.length > 1 ? (
             <ResponsiveContainer width="100%" height={200}>
@@ -395,9 +406,7 @@ export function Dashboard({
             <div style={SEM_DADOS}>Histórico insuficiente ainda.</div>
           )}
         </Painel>
-      </section>
 
-      <section style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
         <Painel
           titulo="Distribuição por Categoria"
           rodape={
@@ -467,7 +476,9 @@ export function Dashboard({
             <div style={SEM_DADOS}>Sem gastos registrados neste mês.</div>
           )}
         </Painel>
+      </section>
 
+      <section style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20 }}>
         <Painel titulo="Gastos por Categoria (Comparativo)">
           {comparativoCategorias.length > 0 ? (
             <>

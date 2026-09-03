@@ -168,6 +168,20 @@ export function IconeMenuPontos() {
   );
 }
 
+export function IconeInsights() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
+      <path
+        d="M9.5 2.8c-2.7 0-4.9 2.2-4.9 4.9 0 1.7.9 3.2 2.2 4.1.5.4.8 1 .8 1.6v.4h3.8v-.4c0-.6.3-1.2.8-1.6 1.3-.9 2.2-2.4 2.2-4.1 0-2.7-2.2-4.9-4.9-4.9Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M7.6 15.8h3.8M8.1 17.2h2.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconeMetas() {
   return (
     <svg width="19" height="19" viewBox="0 0 19 19" fill="none">

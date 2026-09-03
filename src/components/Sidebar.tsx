@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { PAGINAS, PaginaId } from "../constants";
 import {
-  IconeDashboard, IconeExtrato, IconeInvestimentos, IconeApostas, IconeSimulador, IconeMetas,
+  IconeDashboard, IconeExtrato, IconeInvestimentos, IconeApostas, IconeSimulador, IconeMetas, IconeInsights,
 } from "./Icones";
 
 interface Props {
@@ -16,6 +16,7 @@ const ICONES: Record<PaginaId, () => React.ReactElement> = {
   apostas: IconeApostas,
   simulador: IconeSimulador,
   metas: IconeMetas,
+  insights: IconeInsights,
 };
 
 export function Sidebar({ pagina, setPagina }: Props) {
