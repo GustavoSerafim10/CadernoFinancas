@@ -140,13 +140,13 @@ export function Extrato({
         </div>
         <form onSubmit={submeter} style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end", marginBottom: 8 }}>
           <div style={{ flex: "2 1 160px" }}>
-            <input className="cf-focus" value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="descrição" style={campoInput} />
+            <input className="cf-focus" aria-label="Descrição do lançamento" value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="descrição" style={campoInput} />
           </div>
           <div style={{ flex: "1 1 100px" }}>
-            <input className="cf-num cf-focus" value={valor} onChange={(e) => setValor(e.target.value)} placeholder="R$ 0,00" inputMode="decimal" style={campoInput} />
+            <input className="cf-num cf-focus" aria-label="Valor do lançamento" value={valor} onChange={(e) => setValor(e.target.value)} placeholder="R$ 0,00" inputMode="decimal" style={campoInput} />
           </div>
           <div style={{ flex: "1 1 130px" }}>
-            <select className="cf-focus" value={tipo} onChange={(e) => setTipo(e.target.value as TipoTransacao)} style={campoInput}>
+            <select className="cf-focus" aria-label="Tipo de lançamento" value={tipo} onChange={(e) => setTipo(e.target.value as TipoTransacao)} style={campoInput}>
               <option value="gasto">Gasto</option>
               <option value="receita">Receita</option>
               <option value="investimento">Investimento</option>
@@ -154,18 +154,18 @@ export function Extrato({
           </div>
           {tipo === "gasto" && (
             <div style={{ flex: "1 1 130px" }}>
-              <select className="cf-focus" value={categoria} onChange={(e) => setCategoria(e.target.value)} style={campoInput}>
+              <select className="cf-focus" aria-label="Categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)} style={campoInput}>
                 {CATEGORIAS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
               </select>
             </div>
           )}
           <div style={{ flex: "1 1 130px" }}>
-            <select className="cf-focus" value={contaSelecionada} onChange={(e) => setContaId(e.target.value)} style={campoInput}>
+            <select className="cf-focus" aria-label="Conta" value={contaSelecionada} onChange={(e) => setContaId(e.target.value)} style={campoInput}>
               {contas.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
             </select>
           </div>
           <div style={{ flex: "1 1 130px" }}>
-            <input type="date" className="cf-focus" value={data} onChange={(e) => setData(e.target.value)} style={campoInput} />
+            <input type="date" className="cf-focus" aria-label="Data do lançamento" value={data} onChange={(e) => setData(e.target.value)} style={campoInput} />
           </div>
           <button type="submit" className="cf-btn cf-focus" style={botaoPrimario}>
             {editandoId ? "Salvar" : "Anotar"}
@@ -203,6 +203,7 @@ export function Extrato({
               <div style={{ display: "flex", gap: 8 }}>
                 <input
                   className="cf-focus"
+                  aria-label="Nome da nova conta ou cartão"
                   value={novaContaNome}
                   onChange={(e) => setNovaContaNome(e.target.value)}
                   placeholder="nome da nova conta/cartão"
@@ -249,13 +250,13 @@ export function Extrato({
 
       <section>
         <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
-          <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value as TipoTransacao | "todos")} className="cf-focus" style={{ ...campoInput, maxWidth: 150 }}>
+          <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value as TipoTransacao | "todos")} className="cf-focus" aria-label="Filtrar por tipo" style={{ ...campoInput, maxWidth: 150 }}>
             <option value="todos">todos os tipos</option>
             <option value="receita">receitas</option>
             <option value="gasto">gastos</option>
             <option value="investimento">investimentos</option>
           </select>
-          <select value={filtroConta} onChange={(e) => setFiltroConta(e.target.value)} className="cf-focus" style={{ ...campoInput, maxWidth: 180 }}>
+          <select value={filtroConta} onChange={(e) => setFiltroConta(e.target.value)} className="cf-focus" aria-label="Filtrar por conta" style={{ ...campoInput, maxWidth: 180 }}>
             <option value="todas">todas as contas</option>
             {contas.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>

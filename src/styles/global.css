@@ -12,7 +12,7 @@
   /* text */
   --ink: #f4f4f8;
   --ink-soft: #9a99ae;
-  --text-muted: #5f5d72;
+  --text-muted: #86849c;
 
   /* brand accent (the one) */
   --accent: #7c6cf6;
@@ -339,6 +339,18 @@ body {
 .cf-card:hover {
   border-color: var(--border-strong);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(124, 108, 246, 0.18), 0 0 32px rgba(124, 108, 246, 0.12);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .cf-focus:focus-visible {

@@ -66,20 +66,21 @@ export function Simulador() {
       <section style={{ marginBottom: 28 }}>
         <form onSubmit={submeter} style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "flex-end" }}>
           <div style={{ flex: "1 1 140px" }}>
-            <label style={rotuloCampo}>valor inicial</label>
-            <input className="cf-num cf-focus" value={valorInicial} onChange={(e) => setValorInicial(e.target.value)} inputMode="decimal" style={campoInput} />
+            <label htmlFor="sim-valor-inicial" style={rotuloCampo}>valor inicial</label>
+            <input id="sim-valor-inicial" className="cf-num cf-focus" value={valorInicial} onChange={(e) => setValorInicial(e.target.value)} inputMode="decimal" style={campoInput} />
           </div>
           <div style={{ flex: "1 1 140px" }}>
-            <label style={rotuloCampo}>aporte mensal</label>
-            <input className="cf-num cf-focus" value={aporteMensal} onChange={(e) => setAporteMensal(e.target.value)} inputMode="decimal" style={campoInput} />
+            <label htmlFor="sim-aporte-mensal" style={rotuloCampo}>aporte mensal</label>
+            <input id="sim-aporte-mensal" className="cf-num cf-focus" value={aporteMensal} onChange={(e) => setAporteMensal(e.target.value)} inputMode="decimal" style={campoInput} />
           </div>
           <div style={{ flex: "1 1 120px" }}>
-            <label style={rotuloCampo}>taxa anual (%)</label>
-            <input className="cf-num cf-focus" value={taxaAnual} onChange={(e) => setTaxaAnual(e.target.value)} inputMode="decimal" style={campoInput} />
+            <label htmlFor="sim-taxa-anual" style={rotuloCampo}>taxa anual (%)</label>
+            <input id="sim-taxa-anual" className="cf-num cf-focus" value={taxaAnual} onChange={(e) => setTaxaAnual(e.target.value)} inputMode="decimal" style={campoInput} />
           </div>
           <div style={{ flex: "1 1 100px" }}>
-            <label style={rotuloCampo}>anos (máx. {MAX_MESES / 12})</label>
+            <label htmlFor="sim-anos" style={rotuloCampo}>anos (máx. {MAX_MESES / 12})</label>
             <input
+              id="sim-anos"
               className="cf-num cf-focus"
               type="number"
               min={1}
@@ -120,7 +121,7 @@ export function Simulador() {
             </div>
           </section>
 
-          <section>
+          <section role="img" aria-label="Gráfico de área mostrando a evolução projetada do saldo ao longo do período simulado.">
             <div style={rotuloCampo}>evolução do saldo</div>
             <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={dadosGrafico} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>

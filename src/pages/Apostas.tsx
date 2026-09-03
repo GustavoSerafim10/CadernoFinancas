@@ -77,6 +77,7 @@ export function Apostas({
           <div style={{ flex: "2 1 200px" }}>
             <input
               className="cf-focus"
+              aria-label="Descrição da operação"
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="descrição — ex: Flamengo x Palmeiras, dupla vitória"
@@ -86,6 +87,7 @@ export function Apostas({
           <div style={{ flex: "1 1 120px" }}>
             <input
               className="cf-num cf-focus"
+              aria-label="Valor apostado"
               value={valorApostado}
               onChange={(e) => setValorApostado(e.target.value)}
               placeholder="valor apostado"
@@ -94,7 +96,7 @@ export function Apostas({
             />
           </div>
           <div style={{ flex: "1 1 130px" }}>
-            <input type="date" className="cf-focus" value={data} onChange={(e) => setData(e.target.value)} style={campoInput} />
+            <input type="date" className="cf-focus" aria-label="Data da operação" value={data} onChange={(e) => setData(e.target.value)} style={campoInput} />
           </div>
           <button type="submit" className="cf-btn cf-focus" style={botaoPrimario}>Registrar</button>
         </form>
@@ -215,6 +217,7 @@ export function Apostas({
                     <input
                       autoFocus
                       className="cf-num cf-focus"
+                      aria-label="Valor total de retorno"
                       value={retornoInput}
                       onChange={(e) => setRetornoInput(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && confirmarGanhou(a.id)}

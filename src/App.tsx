@@ -85,7 +85,7 @@ export default function App() {
               <div className="eyebrow">Nightfolio</div>
               <h1>Clareza total sobre suas finanças.</h1>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div aria-hidden="true" style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <span className="cf-icone-decorativo" title="Notificações">
                 <IconeSino />
               </span>

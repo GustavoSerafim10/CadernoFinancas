@@ -69,6 +69,7 @@ export function Metas({ metas, setMetaCategoria, resumoMes, refDate }: Props) {
               )}
               <input
                 className="cf-num cf-focus"
+                aria-label={`Limite mensal para ${c.label}`}
                 placeholder="definir limite (R$)"
                 defaultValue={limite || ""}
                 onChange={(e) => setEdicao((s) => ({ ...s, [c.id]: e.target.value }))}

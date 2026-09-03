@@ -1,4 +1,4 @@
-import { useMemo, CSSProperties, ReactNode } from "react";
+import { useMemo, useRef, CSSProperties, ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   ComposedChart, Bar, BarChart, Line, Area, AreaChart, PieChart, Pie, Cell,
@@ -7,6 +7,7 @@ import {
 import { ResumoMes, PontoHistorico, Insight, ResumoApostas, Transacao, Metas } from "../types";
 import { MESES, catLabel, PaginaId } from "../constants";
 import { formatarMoeda, formatarPct } from "../utils/format";
+import { useOcultarSvgDecorativo } from "../hooks/useOcultarSvgDecorativo";
 import { KpiCard } from "../components/KpiCard";
 import { Painel } from "../components/Painel";
 import { CardSaudeFinanceira } from "../components/CardSaudeFinanceira";
@@ -54,9 +55,12 @@ function TickMesAtual({ x, y, payload, ultimoLabel }: TickMesAtualProps) {
   );
 }
 
-function DonutComTotal({ children, total }: { children: ReactNode; total: number }) {
+function DonutComTotal({ children, total, resumo }: { children: ReactNode; total: number; resumo: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useOcultarSvgDecorativo(ref);
+
   return (
-    <div style={{ position: "relative", width: 142, height: 142 }}>
+    <div ref={ref} role="img" aria-label={resumo} style={{ position: "relative", width: 142, height: 142 }}>
       {children}
       <div
         style={{
@@ -149,6 +153,15 @@ export function Dashboard({
     () => [...resumoMes.porCategoria].sort((a, b) => b.total - a.total),
     [resumoMes.porCategoria]
   );
+
+  const resumoDonutValores = categoriasOrdenadas
+    .slice(0, 4)
+    .map((c) => `${c.label} ${formatarMoeda(c.total)}`)
+    .join(", ");
+  const resumoDonutPercentuais = categoriasOrdenadas
+    .slice(0, 4)
+    .map((c) => `${c.label} ${totalGastosCategoria > 0 ? Math.round((c.total / totalGastosCategoria) * 100) : 0}%`)
+    .join(", ");
 
   const comparativoCategorias = useMemo(() => {
     const mapa = new Map<string, { id: string; label: string; atual: number; anterior: number }>();
@@ -266,7 +279,11 @@ export function Dashboard({
       <CardSaudeFinanceira saude={saude} />
 
       <section style={{ marginBottom: 20 }}>
-        <Painel titulo="Fluxo de Caixa Mensal" acao={<span className="cf-pill-decorativo">Últimos 12 meses ⌄</span>}>
+        <Painel
+          titulo="Fluxo de Caixa Mensal"
+          acao={<span className="cf-pill-decorativo">Últimos 12 meses ⌄</span>}
+          resumoGrafico="Gráfico combinado com receita e gastos em barras e saldo em linha, mês a mês, nos últimos 12 meses."
+        >
           {historicoComLabel.length > 1 ? (
             <>
               <div style={{ display: "flex", gap: 14, marginBottom: 12, fontSize: 12, color: "var(--ink-soft)", flexWrap: "wrap" }}>
@@ -309,7 +326,10 @@ export function Dashboard({
         <Painel titulo="Gastos por Categoria">
           {resumoMes.porCategoria.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-              <DonutComTotal total={totalGastosCategoria}>
+              <DonutComTotal
+                total={totalGastosCategoria}
+                resumo={`Gráfico de rosca com o total gasto por categoria, ${formatarMoeda(totalGastosCategoria)}: ${resumoDonutValores}.`}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={resumoMes.porCategoria} dataKey="total" nameKey="label" innerRadius={42} outerRadius={68} paddingAngle={2}>
@@ -365,7 +385,10 @@ export function Dashboard({
           )}
         </Painel>
 
-        <Painel titulo="Evolução do saldo">
+        <Painel
+          titulo="Evolução do saldo"
+          resumoGrafico="Gráfico de área mostrando a evolução do saldo acumulado mês a mês nos últimos 12 meses."
+        >
           {saldoAcumulado.length > 1 ? (
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={saldoAcumulado} margin={{ top: 42, right: 4, left: -22, bottom: 0 }}>
@@ -417,7 +440,10 @@ export function Dashboard({
         >
           {categoriasOrdenadas.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-              <DonutComTotal total={totalGastosCategoria}>
+              <DonutComTotal
+                total={totalGastosCategoria}
+                resumo={`Gráfico de rosca com a distribuição percentual dos gastos por categoria: ${resumoDonutPercentuais}.`}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={categoriasOrdenadas} dataKey="total" nameKey="label" innerRadius={42} outerRadius={68} paddingAngle={2}>

@@ -33,8 +33,8 @@ export const cartaoEstilo: CSSProperties = {
 export const botaoPrimario: CSSProperties = {
   padding: "8px 18px",
   borderRadius: 8,
-  border: "1.5px solid var(--accent)",
-  background: "var(--accent)",
+  border: "1.5px solid var(--accent-press)",
+  background: "var(--accent-press)",
   color: "var(--ink)",
   fontSize: 13.5,
   fontWeight: 600,

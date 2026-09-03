@@ -1,9 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Investimento } from "../types";
 import { TIPOS_INVESTIMENTO } from "../constants";
 import { formatarMoeda, formatarPct, parseMoeda } from "../utils/format";
+import { useOcultarSvgDecorativo } from "../hooks/useOcultarSvgDecorativo";
 import { IconeX, IconeEditar } from "../components/Icones";
 import { NumeroAnimado } from "../components/NumeroAnimado";
 import { rotuloCampo, campoInput, cartaoEstilo, botaoPrimario, botaoGhost, linkDiscreto } from "../components/estilosComuns";
@@ -20,6 +21,9 @@ interface Props {
 }
 
 export function Investimentos({ investimentos, adicionarInvestimento, removerInvestimento, atualizarInvestimento }: Props) {
+  const donutRef = useRef<HTMLDivElement>(null);
+  useOcultarSvgDecorativo(donutRef);
+
   const [nome, setNome] = useState("");
   const [tipo, setTipo] = useState<string>(TIPOS_INVESTIMENTO[0]);
   const [aportado, setAportado] = useState("");
@@ -80,18 +84,18 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
         </div>
         <form onSubmit={submeter} style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end" }}>
           <div style={{ flex: "2 1 160px" }}>
-            <input className="cf-focus" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="nome — ex: Tesouro Selic 2029" style={campoInput} />
+            <input className="cf-focus" aria-label="Nome do investimento" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="nome — ex: Tesouro Selic 2029" style={campoInput} />
           </div>
           <div style={{ flex: "1 1 140px" }}>
-            <select className="cf-focus" value={tipo} onChange={(e) => setTipo(e.target.value)} style={campoInput}>
+            <select className="cf-focus" aria-label="Tipo do investimento" value={tipo} onChange={(e) => setTipo(e.target.value)} style={campoInput}>
               {TIPOS_INVESTIMENTO.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
           <div style={{ flex: "1 1 110px" }}>
-            <input className="cf-num cf-focus" value={aportado} onChange={(e) => setAportado(e.target.value)} placeholder="aportado" inputMode="decimal" style={campoInput} />
+            <input className="cf-num cf-focus" aria-label="Valor aportado" value={aportado} onChange={(e) => setAportado(e.target.value)} placeholder="aportado" inputMode="decimal" style={campoInput} />
           </div>
           <div style={{ flex: "1 1 110px" }}>
-            <input className="cf-num cf-focus" value={atual} onChange={(e) => setAtual(e.target.value)} placeholder="valor atual" inputMode="decimal" style={campoInput} />
+            <input className="cf-num cf-focus" aria-label="Valor atual" value={atual} onChange={(e) => setAtual(e.target.value)} placeholder="valor atual" inputMode="decimal" style={campoInput} />
           </div>
           <button type="submit" className="cf-btn cf-focus" style={botaoPrimario}>
             {editandoId ? "Salvar" : "Adicionar"}
@@ -123,7 +127,12 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
 
           {totais.porTipo.length > 1 && (
             <section style={{ marginBottom: 32, display: "flex", flexWrap: "wrap", gap: 24, alignItems: "center" }}>
-              <div style={{ width: 200, height: 200 }}>
+              <div
+                ref={donutRef}
+                role="img"
+                aria-label={`Gráfico de rosca com o valor investido por tipo: ${totais.porTipo.map((t) => `${t.tipo} ${formatarMoeda(t.valor)}`).join(", ")}.`}
+                style={{ width: 200, height: 200 }}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={totais.porTipo} dataKey="valor" nameKey="tipo" innerRadius={50} outerRadius={90} paddingAngle={2}>
@@ -166,6 +175,7 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                   <input
                     key={`${inv.id}-${inv.valorAtual}`}
                     className="cf-num cf-focus"
+                    aria-label={`Valor atual de ${inv.nome}`}
                     defaultValue={inv.valorAtual}
                     onBlur={(e) => {
                       const v = parseMoeda(e.target.value);
