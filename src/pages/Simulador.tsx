@@ -33,6 +33,7 @@ export function Simulador() {
     const anosNum = parseInt(anos, 10);
     if (vi === null || am === null || ta === null || vi < 0 || am < 0 || ta < 0 || isNaN(anosNum) || anosNum <= 0) {
       setErro("Confere os valores — todos precisam ser números válidos e positivos.");
+      setResultado(null);
       return;
     }
     const meses = Math.min(anosNum * 12, MAX_MESES);
@@ -43,6 +44,7 @@ export function Simulador() {
       setResultado({ saldos, totalAportado: vi + am * saldos.length });
     } catch {
       setErro("Não consegui carregar o motor de simulação (WebAssembly) agora.");
+      setResultado(null);
     } finally {
       setCalculando(false);
     }
