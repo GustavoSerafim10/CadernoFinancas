@@ -268,11 +268,13 @@ export default function App() {
               />
             ) : (
               <Insights
+                refDate={refDate}
                 resumoMes={financas.resumoMes}
                 resumoMesAnterior={financas.resumoMesAnterior}
                 historicoMensal={financas.historicoMensal}
                 metas={financas.metas}
                 resumoApostas={financas.resumoApostas}
+                recorrencias={financas.recorrencias}
               />
             )}
           </Suspense>

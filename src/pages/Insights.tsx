@@ -1,15 +1,18 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { ResumoMes, PontoHistorico, Metas, ResumoApostas } from "../types";
+import { ResumoMes, PontoHistorico, Metas, ResumoApostas, Recorrencia } from "../types";
+import { MESES } from "../constants";
 import { cartaoEstilo } from "../components/estilosComuns";
 import { calcularInsightsFinanceiros } from "../utils/insightsFinanceiros";
 
 interface Props {
+  refDate: Date;
   resumoMes: ResumoMes;
   resumoMesAnterior: ResumoMes;
   historicoMensal: PontoHistorico[];
   metas: Metas;
   resumoApostas: ResumoApostas;
+  recorrencias: Recorrencia[];
 }
 
 const CORES_TOM: Record<string, string> = {
@@ -18,14 +21,17 @@ const CORES_TOM: Record<string, string> = {
   neutro: "var(--accent)",
 };
 
-export function Insights({ resumoMes, resumoMesAnterior, historicoMensal, metas, resumoApostas }: Props) {
+export function Insights({ refDate, resumoMes, resumoMesAnterior, historicoMensal, metas, resumoApostas, recorrencias }: Props) {
   const itens = useMemo(
-    () => calcularInsightsFinanceiros(resumoMes, resumoMesAnterior, historicoMensal, metas, resumoApostas),
-    [resumoMes, resumoMesAnterior, historicoMensal, metas, resumoApostas]
+    () => calcularInsightsFinanceiros(resumoMes, resumoMesAnterior, historicoMensal, metas, resumoApostas, recorrencias),
+    [resumoMes, resumoMesAnterior, historicoMensal, metas, resumoApostas, recorrencias]
   );
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
+      <div style={{ fontSize: 15, fontWeight: 600, fontFamily: "'Space Grotesk', sans-serif", marginBottom: 6 }}>
+        Resumo de {MESES[refDate.getMonth()]}
+      </div>
       <div style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 24 }}>
         leituras automáticas sobre o seu mês, geradas a partir dos seus próprios lançamentos — sem inteligência
         artificial, só regras matemáticas simples.

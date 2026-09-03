@@ -1,4 +1,4 @@
-import { ResumoMes, PontoHistorico, Metas, ResumoApostas } from "../types";
+import { ResumoMes, PontoHistorico, Metas, ResumoApostas, Recorrencia } from "../types";
 import { catLabel } from "../constants";
 import { formatarMoeda } from "./format";
 
@@ -19,7 +19,8 @@ export function calcularInsightsFinanceiros(
   resumoMesAnterior: ResumoMes,
   historicoMensal: PontoHistorico[],
   metas: Metas,
-  resumoApostas: ResumoApostas
+  resumoApostas: ResumoApostas,
+  recorrencias: Recorrencia[]
 ): InsightItem[] {
   const itens: InsightItem[] = [];
 
@@ -46,6 +47,14 @@ export function calcularInsightsFinanceiros(
     });
   }
 
+  if (resumoMes.saldo > 0) {
+    itens.push({
+      emoji: "🎯",
+      texto: `Com o saldo livre deste mês, você tem aproximadamente ${formatarMoeda(resumoMes.saldo)} de margem pra investir sem comprometer o que já está reservado.`,
+      tom: "positivo",
+    });
+  }
+
   const totalGastos = resumoMes.porCategoria.reduce((s, c) => s + c.total, 0);
   if (totalGastos > 0) {
     const maior = [...resumoMes.porCategoria].sort((a, b) => b.total - a.total)[0];
@@ -54,6 +63,16 @@ export function calcularInsightsFinanceiros(
       emoji: "📊",
       texto: `${maior.label} representa ${pct}% das suas despesas este mês.`,
       tom: pct >= 40 ? "atencao" : "neutro",
+    });
+  }
+
+  const recorrentesAtivas = recorrencias.filter((r) => r.ativa && r.tipo === "gasto");
+  if (recorrentesAtivas.length > 0) {
+    const totalMensal = recorrentesAtivas.reduce((s, r) => s + r.valor, 0);
+    itens.push({
+      emoji: "🔁",
+      texto: `Você tem ${recorrentesAtivas.length} gasto(s) recorrente(s) somando ${formatarMoeda(totalMensal)}/mês — projetando ${formatarMoeda(totalMensal * 12)} em 12 meses.`,
+      tom: "neutro",
     });
   }
 

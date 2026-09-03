@@ -5,7 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList,
 } from "recharts";
 import { ResumoMes, PontoHistorico, Insight, ResumoApostas, Transacao, Metas } from "../types";
-import { MESES, catLabel, PaginaId } from "../constants";
+import { MESES, catLabel, catCor, PaginaId } from "../constants";
 import { formatarMoeda, formatarPct } from "../utils/format";
 import { useOcultarSvgDecorativo } from "../hooks/useOcultarSvgDecorativo";
 import { KpiCard } from "../components/KpiCard";
@@ -158,10 +158,17 @@ export function Dashboard({
     .slice(0, 4)
     .map((c) => `${c.label} ${formatarMoeda(c.total)}`)
     .join(", ");
-  const resumoDonutPercentuais = categoriasOrdenadas
-    .slice(0, 4)
-    .map((c) => `${c.label} ${totalGastosCategoria > 0 ? Math.round((c.total / totalGastosCategoria) * 100) : 0}%`)
-    .join(", ");
+
+  const orcamentoPorCategoria = useMemo(() => {
+    return Object.entries(metas)
+      .filter(([, limite]) => limite > 0)
+      .map(([catId, limite]) => {
+        const gasto = resumoMes.porCategoria.find((c) => c.id === catId)?.total || 0;
+        return { id: catId, label: catLabel(catId), cor: catCor(catId), gasto, limite, pct: Math.min(100, (gasto / limite) * 100) };
+      })
+      .sort((a, b) => b.pct - a.pct)
+      .slice(0, 5);
+  }, [metas, resumoMes.porCategoria]);
 
   const comparativoCategorias = useMemo(() => {
     const mapa = new Map<string, { id: string; label: string; atual: number; anterior: number }>();
@@ -254,7 +261,7 @@ export function Dashboard({
         />
         <KpiCard
           icone={<IconeApostas />}
-          label="apostas"
+          label="operações"
           valor={resumoApostas.lucro}
           valorAnterior={serieApostas[serieApostas.length - 2] ?? 0}
           formatar={(v) => `${v >= 0 ? "+" : ""}${formatarMoeda(v)}`}
@@ -431,75 +438,45 @@ export function Dashboard({
         </Painel>
 
         <Painel
-          titulo="Distribuição por Categoria"
+          titulo="Orçamento por Categoria"
           rodape={
             <button onClick={() => setPagina("metas")} className="cf-link-mais cf-focus">
-              Ver todas categorias →
+              Ver todas as metas →
             </button>
           }
         >
-          {categoriasOrdenadas.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-              <DonutComTotal
-                total={totalGastosCategoria}
-                resumo={`Gráfico de rosca com a distribuição percentual dos gastos por categoria: ${resumoDonutPercentuais}.`}
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={categoriasOrdenadas} dataKey="total" nameKey="label" innerRadius={42} outerRadius={68} paddingAngle={2}>
-                      {categoriasOrdenadas.map((c) => (
-                        <Cell key={c.id} fill={c.cor} stroke={CHART_STROKE_SEPARATOR} strokeWidth={2} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(v: number) => formatarPct((v / (totalGastosCategoria || 1)) * 100)}
-                      contentStyle={CHART_TOOLTIP_STYLE}
-                      itemStyle={CHART_TOOLTIP_ITEM_STYLE}
-                      labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-                      position={{ x: -20, y: -66 }}
-                      allowEscapeViewBox={{ x: true, y: true }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </DonutComTotal>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: "left", padding: "0 0 6px", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-soft)", fontWeight: 500 }}>
-                      Categoria
-                    </th>
-                    <th style={{ textAlign: "right", padding: "0 0 6px", fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-soft)", fontWeight: 500 }}>
-                      %
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categoriasOrdenadas.slice(0, 4).map((c) => {
-                    const pct = totalGastosCategoria > 0 ? Math.round((c.total / totalGastosCategoria) * 100) : 0;
-                    return (
-                      <tr key={c.id}>
-                        <td style={{ padding: "4px 0", color: "var(--ink-soft)" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ width: 7, height: 7, borderRadius: "50%", background: c.cor, flex: "0 0 auto" }} />
-                            <span style={{ flex: "0 0 auto", maxWidth: 82, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {c.label}
-                            </span>
-                            <span style={{ flex: 1, height: 5, borderRadius: 3, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
-                              <span style={{ display: "block", height: "100%", width: `${pct}%`, borderRadius: 3, background: c.cor }} />
-                            </span>
-                          </div>
-                        </td>
-                        <td className="cf-num" style={{ padding: "4px 0 4px 10px", textAlign: "right", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-                          {pct}%
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          {orcamentoPorCategoria.length > 0 ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {orcamentoPorCategoria.map((c) => {
+                const pctExibido = Math.round(c.pct);
+                const estourou = c.gasto > c.limite;
+                const corBarra = estourou ? "var(--rust)" : c.pct >= 80 ? "var(--ouro)" : c.cor;
+                return (
+                  <div key={c.id}>
+                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 4, fontSize: 12.5 }}>
+                      <span style={{ color: "var(--ink)" }}>{c.label}</span>
+                      <span className="cf-num" style={{ color: "var(--ink-soft)", whiteSpace: "nowrap" }}>
+                        {formatarMoeda(c.gasto)} / {formatarMoeda(c.limite)}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ flex: 1, height: 6, borderRadius: 3, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
+                        <span style={{ display: "block", height: "100%", width: `${pctExibido}%`, borderRadius: 3, background: corBarra }} />
+                      </span>
+                      <span className="cf-num" style={{ fontSize: 11.5, color: corBarra, minWidth: 34, textAlign: "right" }}>
+                        {pctExibido}%
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ) : (
-            <div style={SEM_DADOS}>Sem gastos registrados neste mês.</div>
+            <div style={SEM_DADOS}>
+              Nenhuma meta de categoria definida ainda.
+              <br />
+              Defina limites em Metas pra acompanhar aqui.
+            </div>
           )}
         </Painel>
       </section>
