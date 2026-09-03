@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Metas as MetasType, ResumoMes } from "../types";
 import { CATEGORIAS, MESES } from "../constants";
@@ -13,10 +12,7 @@ interface Props {
 }
 
 export function Metas({ metas, setMetaCategoria, resumoMes, refDate }: Props) {
-  const [edicao, setEdicao] = useState<Record<string, string>>({});
-
-  function confirmar(catId: string) {
-    const bruto = edicao[catId] ?? "";
+  function confirmar(catId: string, bruto: string) {
     const v = parseMoeda(bruto);
     setMetaCategoria(catId, v === null ? 0 : v);
   }
@@ -72,9 +68,8 @@ export function Metas({ metas, setMetaCategoria, resumoMes, refDate }: Props) {
                 aria-label={`Limite mensal para ${c.label}`}
                 placeholder="definir limite (R$)"
                 defaultValue={limite || ""}
-                onChange={(e) => setEdicao((s) => ({ ...s, [c.id]: e.target.value }))}
-                onBlur={() => confirmar(c.id)}
-                onKeyDown={(e) => e.key === "Enter" && confirmar(c.id)}
+                onBlur={(e) => confirmar(c.id, e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && confirmar(c.id, e.currentTarget.value)}
                 style={{ ...campoInput, maxWidth: 160 }}
               />
             </div>
