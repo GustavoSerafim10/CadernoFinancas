@@ -147,7 +147,9 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
         </form>
       </section>
 
-      {investimentos.length > 0 && (
+      {investimentos.length === 0 ? (
+        <p style={{ color: "var(--ink-soft)", fontSize: 14, fontStyle: "italic" }}>nenhuma posição registrada ainda.</p>
+      ) : (
         <>
           <section className="cf-card" style={{ ...cartaoEstilo, marginBottom: 32 }}>
             <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 15, marginBottom: 16 }}>carteira</div>

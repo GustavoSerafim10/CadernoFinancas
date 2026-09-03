@@ -36,7 +36,7 @@ export function calcularSaudeFinanceira(
   const PESO_METAS = 20;
 
   const taxaPoupanca = resumoMes.receita > 0 ? resumoMes.saldo / resumoMes.receita : 0;
-  const scorePoupanca = Math.max(0, Math.min(100, (taxaPoupanca / 0.4) * 100));
+  const scorePoupanca = resumoMes.receita > 0 ? Math.max(0, Math.min(100, (taxaPoupanca / 0.4) * 100)) : 60;
   fatores.push({
     label: "Capacidade de poupança",
     detalhe:
