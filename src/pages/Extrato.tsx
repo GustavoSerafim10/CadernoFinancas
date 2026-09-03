@@ -45,7 +45,8 @@ export function Extrato({
   const [msgGerar, setMsgGerar] = useState<string | null>(null);
   const [editandoId, setEditandoId] = useState<string | null>(null);
 
-  const contaSelecionada = contaId || contas[0]?.id || "";
+  const contaSelecionada = contas.some((c) => c.id === contaId) ? contaId : contas[0]?.id || "";
+  const filtroContaEfetivo = filtroConta === "todas" || contas.some((c) => c.id === filtroConta) ? filtroConta : "todas";
 
   function limparFormulario() {
     setDescricao("");
@@ -122,7 +123,7 @@ export function Extrato({
 
   const listaFiltrada = transacoesDoMes
     .filter((t) => filtroTipo === "todos" || t.tipo === filtroTipo)
-    .filter((t) => filtroConta === "todas" || t.contaId === filtroConta)
+    .filter((t) => filtroContaEfetivo === "todas" || t.contaId === filtroContaEfetivo)
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 
   return (
@@ -256,7 +257,7 @@ export function Extrato({
             <option value="gasto">gastos</option>
             <option value="investimento">investimentos</option>
           </select>
-          <select value={filtroConta} onChange={(e) => setFiltroConta(e.target.value)} className="cf-focus" aria-label="Filtrar por conta" style={{ ...campoInput, maxWidth: 180 }}>
+          <select value={filtroContaEfetivo} onChange={(e) => setFiltroConta(e.target.value)} className="cf-focus" aria-label="Filtrar por conta" style={{ ...campoInput, maxWidth: 180 }}>
             <option value="todas">todas as contas</option>
             {contas.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
