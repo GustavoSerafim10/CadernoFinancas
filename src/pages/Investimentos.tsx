@@ -1,10 +1,10 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Investimento } from "../types";
 import { TIPOS_INVESTIMENTO } from "../constants";
 import { formatarMoeda, formatarPct, parseMoeda } from "../utils/format";
-import { calcularValorAtualCaixinha } from "../utils/caixinha";
+import { calcularValorComRentabilidadeMensal } from "../utils/rentabilidade";
 import { useOcultarSvgDecorativo } from "../hooks/useOcultarSvgDecorativo";
 import { IconeX, IconeEditar } from "../components/Icones";
 import { NumeroAnimado } from "../components/NumeroAnimado";
@@ -22,8 +22,7 @@ interface Props {
 }
 
 export function Investimentos({ investimentos, adicionarInvestimento, removerInvestimento, atualizarInvestimento }: Props) {
-  const donutRef = useRef<HTMLDivElement>(null);
-  useOcultarSvgDecorativo(donutRef);
+  const donutRef = useOcultarSvgDecorativo();
 
   const [nome, setNome] = useState("");
   const [tipo, setTipo] = useState<string>(TIPOS_INVESTIMENTO[0]);
@@ -32,9 +31,8 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
   const [taxaMensal, setTaxaMensal] = useState("");
   const [dataAporte, setDataAporte] = useState(() => new Date().toISOString().slice(0, 10));
   const [instituicao, setInstituicao] = useState("");
+  const [rentabilidadeAutomatica, setRentabilidadeAutomatica] = useState(false);
   const [editandoId, setEditandoId] = useState<string | null>(null);
-
-  const ehCaixinha = tipo === "Caixinha";
 
   function limparFormulario() {
     setNome("");
@@ -43,6 +41,7 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
     setTaxaMensal("");
     setDataAporte(new Date().toISOString().slice(0, 10));
     setInstituicao("");
+    setRentabilidadeAutomatica(false);
     setTipo(TIPOS_INVESTIMENTO[0]);
     setEditandoId(null);
   }
@@ -56,11 +55,12 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
     setTaxaMensal(inv.taxaMensal !== undefined ? String(inv.taxaMensal).replace(".", ",") : "");
     setDataAporte(inv.data.slice(0, 10));
     setInstituicao(inv.instituicao || "");
+    setRentabilidadeAutomatica(inv.taxaMensal !== undefined);
   }
 
   function valorAtualEfetivo(inv: Investimento): number {
-    if (inv.tipo === "Caixinha" && inv.taxaMensal !== undefined) {
-      return calcularValorAtualCaixinha(inv.valorAportado, inv.data, inv.taxaMensal);
+    if (inv.taxaMensal !== undefined) {
+      return calcularValorComRentabilidadeMensal(inv.valorAportado, inv.data, inv.taxaMensal);
     }
     return inv.valorAtual;
   }
@@ -72,7 +72,7 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
     const dataISO = `${dataAporte}T12:00:00.000Z`;
     const instituicaoCampo = instituicao.trim() || undefined;
 
-    if (ehCaixinha) {
+    if (rentabilidadeAutomatica) {
       const taxa = parseMoeda(taxaMensal);
       if (taxa === null || taxa < 0) return;
       if (editandoId) {
@@ -121,15 +121,31 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
             <input className="cf-focus" aria-label="Nome do investimento" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="nome — ex: Tesouro Selic 2029" style={campoInput} />
           </div>
           <div style={{ flex: "1 1 140px" }}>
-            <select className="cf-focus" aria-label="Tipo do investimento" value={tipo} onChange={(e) => setTipo(e.target.value)} style={campoInput}>
+            <select
+              className="cf-focus"
+              aria-label="Tipo do investimento"
+              value={tipo}
+              onChange={(e) => {
+                const novoTipo = e.target.value;
+                setTipo(novoTipo);
+                if (novoTipo === "Caixinha") setRentabilidadeAutomatica(true);
+              }}
+              style={campoInput}
+            >
               {TIPOS_INVESTIMENTO.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
+          </div>
+          <div style={{ flex: "1 1 100%" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12.5, color: "var(--ink-soft)", cursor: "pointer" }}>
+              <input type="checkbox" checked={rentabilidadeAutomatica} onChange={(e) => setRentabilidadeAutomatica(e.target.checked)} />
+              rentabilidade automática (juros compostos mensais — estimativa, não é o preço real de mercado)
+            </label>
           </div>
           <div style={{ flex: "1 1 110px" }}>
             <input className="cf-num cf-focus" aria-label="Valor aportado" value={aportado} onChange={(e) => setAportado(e.target.value)} placeholder="aportado" inputMode="decimal" style={campoInput} />
           </div>
           <div style={{ flex: "1 1 110px" }}>
-            {ehCaixinha ? (
+            {rentabilidadeAutomatica ? (
               <input className="cf-num cf-focus" aria-label="Rentabilidade mensal em porcentagem" value={taxaMensal} onChange={(e) => setTaxaMensal(e.target.value)} placeholder="rentabilidade % ao mês" inputMode="decimal" style={campoInput} />
             ) : (
               <input className="cf-num cf-focus" aria-label="Valor atual" value={atual} onChange={(e) => setAtual(e.target.value)} placeholder="valor atual" inputMode="decimal" style={campoInput} />
@@ -210,7 +226,7 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
           <section>
             <div style={rotuloCampo}>posições</div>
             {investimentos.map((inv, i) => {
-              const ehCaixinhaLinha = inv.tipo === "Caixinha" && inv.taxaMensal !== undefined;
+              const temRentabilidadeAuto = inv.taxaMensal !== undefined;
               const valorAtual = valorAtualEfetivo(inv);
               const rent = inv.valorAportado > 0 ? ((valorAtual - inv.valorAportado) / inv.valorAportado) * 100 : 0;
               const rotulo = `${inv.nome}, ${inv.tipo}, ${formatarMoeda(valorAtual)}`;
@@ -227,11 +243,11 @@ export function Investimentos({ investimentos, adicionarInvestimento, removerInv
                     <div style={{ fontSize: 14.5 }}>{inv.nome}</div>
                     <div style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase" }}>
                       {inv.tipo}
-                      {ehCaixinhaLinha && ` · ${formatarPct(inv.taxaMensal!)}/mês`}
+                      {temRentabilidadeAuto && ` · ${formatarPct(inv.taxaMensal!)}/mês`}
                       {inv.instituicao && ` · ${inv.instituicao}`}
                     </div>
                   </div>
-                  {ehCaixinhaLinha ? (
+                  {temRentabilidadeAuto ? (
                     <span
                       className="cf-num"
                       aria-label={`Valor atual de ${inv.nome}`}

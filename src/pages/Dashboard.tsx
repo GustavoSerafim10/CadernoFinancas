@@ -1,4 +1,4 @@
-import { useMemo, useRef, CSSProperties, ReactNode } from "react";
+import { useMemo, CSSProperties, ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   ComposedChart, Bar, BarChart, Line, Area, AreaChart, PieChart, Pie, Cell,
@@ -56,8 +56,7 @@ function TickMesAtual({ x, y, payload, ultimoLabel }: TickMesAtualProps) {
 }
 
 function DonutComTotal({ children, total, resumo }: { children: ReactNode; total: number; resumo: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useOcultarSvgDecorativo(ref);
+  const ref = useOcultarSvgDecorativo();
 
   return (
     <div ref={ref} role="img" aria-label={resumo} style={{ position: "relative", width: 142, height: 142 }}>
