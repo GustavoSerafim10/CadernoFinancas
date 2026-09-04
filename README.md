@@ -93,12 +93,15 @@ scripts/
   últimos lançamentos.
 - **Extrato** — lançar receitas/gastos/investimentos, recorrências, contas.
 - **Investimentos** — carteira com total aportado, valor atual, resultado
-  (R$) e rentabilidade (%), por posição e por tipo. Tipo especial
-  **Caixinha**: em vez de digitar o valor atual à mão, guarda a
-  rentabilidade mensal (%) e o valor cresce sozinho por juros compostos
-  a partir da data do aporte — igual o banco fecha o rendimento todo mês,
-  calculado na hora de exibir, sem precisar de atualização manual nem
-  ficar desatualizado. Campo opcional de instituição/corretora.
+  (R$) e rentabilidade (%), por posição e por tipo. **Rentabilidade
+  automática** (opcional, qualquer tipo): em vez de digitar o valor atual
+  à mão, guarda a rentabilidade mensal (%) e o valor cresce sozinho por
+  juros compostos a partir da data do aporte, calculado na hora de exibir
+  — sem precisar de atualização manual nem ficar desatualizado. Serve bem
+  pra Caixinha (renda fixa de banco, ativa por padrão nesse tipo) ou como
+  estimativa do dividend yield médio de algo como um FII; não reflete a
+  variação real de preço de mercado de ações, FIIs ou cripto. Campo
+  opcional de instituição/corretora.
 - **Operações** — apostas esportivas: registra, resolve (ganhou/perdeu) e o
   resultado líquido entra automaticamente no saldo do mês.
 - **Simulador** — projeção de juros compostos, calculada em Rust/WASM.
