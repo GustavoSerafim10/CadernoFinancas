@@ -30,6 +30,7 @@ export function Apostas({
 
   const [resolvendoGanhoId, setResolvendoGanhoId] = useState<string | null>(null);
   const [retornoInput, setRetornoInput] = useState("");
+  const [oddInput, setOddInput] = useState("");
 
   function submeter(e: React.FormEvent) {
     e.preventDefault();
@@ -43,6 +44,20 @@ export function Apostas({
   function iniciarGanhou(a: Aposta) {
     setResolvendoGanhoId(a.id);
     setRetornoInput(String(a.valorApostado).replace(".", ","));
+    setOddInput("");
+  }
+
+  function alterarOdd(a: Aposta, valor: string) {
+    setOddInput(valor);
+    const odd = parseMoeda(valor);
+    if (odd !== null && odd > 0) {
+      setRetornoInput((a.valorApostado * odd).toFixed(2).replace(".", ","));
+    }
+  }
+
+  function alterarRetornoManual(valor: string) {
+    setRetornoInput(valor);
+    setOddInput("");
   }
 
   function confirmarGanhou(id: string) {
@@ -51,6 +66,7 @@ export function Apostas({
     resolverAposta(id, "ganhou", v);
     setResolvendoGanhoId(null);
     setRetornoInput("");
+    setOddInput("");
   }
 
   function handlePerdeu(a: Aposta) {
@@ -211,26 +227,48 @@ export function Apostas({
                   </button>
                 </div>
 
-                {resolvendoGanhoId === a.id && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, rowGap: 8, flexWrap: "wrap", marginTop: 10, marginLeft: 19 }}>
-                    <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>voltou quanto no total?</span>
-                    <input
-                      autoFocus
-                      className="cf-num cf-focus"
-                      aria-label="Valor total de retorno"
-                      value={retornoInput}
-                      onChange={(e) => setRetornoInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && confirmarGanhou(a.id)}
-                      style={{ ...campoInput, width: 110 }}
-                    />
-                    <button onClick={() => confirmarGanhou(a.id)} className="cf-focus" style={{ ...botaoSecundario, padding: "3px 10px", fontSize: 11.5 }}>
-                      confirmar
-                    </button>
-                    <button onClick={() => setResolvendoGanhoId(null)} className="cf-focus" style={linkDiscreto}>
-                      cancelar
-                    </button>
-                  </div>
-                )}
+                {resolvendoGanhoId === a.id && (() => {
+                  const retornoPreview = parseMoeda(retornoInput);
+                  const lucroPreview = retornoPreview !== null ? retornoPreview - a.valorApostado : null;
+                  return (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, rowGap: 8, flexWrap: "wrap", marginTop: 10, marginLeft: 19 }}>
+                      <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>odd</span>
+                      <input
+                        autoFocus
+                        className="cf-num cf-focus"
+                        aria-label="Odd da aposta"
+                        value={oddInput}
+                        onChange={(e) => alterarOdd(a, e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && confirmarGanhou(a.id)}
+                        placeholder="ex: 1,83"
+                        style={{ ...campoInput, width: 70 }}
+                      />
+                      <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }}>ou voltou quanto no total?</span>
+                      <input
+                        className="cf-num cf-focus"
+                        aria-label="Valor total de retorno"
+                        value={retornoInput}
+                        onChange={(e) => alterarRetornoManual(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && confirmarGanhou(a.id)}
+                        style={{ ...campoInput, width: 100 }}
+                      />
+                      {lucroPreview !== null && (
+                        <span
+                          className="cf-num"
+                          style={{ fontSize: 12.5, fontWeight: 600, color: lucroPreview >= 0 ? "var(--verde)" : "var(--rust)" }}
+                        >
+                          lucro: {lucroPreview >= 0 ? "+" : ""}{formatarMoeda(lucroPreview)}
+                        </span>
+                      )}
+                      <button onClick={() => confirmarGanhou(a.id)} className="cf-focus" style={{ ...botaoSecundario, padding: "3px 10px", fontSize: 11.5 }}>
+                        confirmar
+                      </button>
+                      <button onClick={() => setResolvendoGanhoId(null)} className="cf-focus" style={linkDiscreto}>
+                        cancelar
+                      </button>
+                    </div>
+                  );
+                })()}
               </motion.div>
             );
           })}
