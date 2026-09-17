@@ -9,6 +9,46 @@ import {
   rotuloCampo, campoInput, cartaoEstilo, botaoPrimario, botaoSecundario, botaoGhost, linkDiscreto, badgeEstilo,
 } from "../components/estilosComuns";
 
+interface GrupoDia {
+  chave: string;
+  rotulo: string;
+  apostas: Aposta[];
+  apostado: number;
+  lucro: number;
+  pendentes: number;
+}
+
+function rotuloDia(iso: string): string {
+  const d = new Date(iso);
+  const hoje = new Date();
+  const ontem = new Date(hoje);
+  ontem.setDate(hoje.getDate() - 1);
+  const chaveD = d.toLocaleDateString("pt-BR");
+  if (chaveD === hoje.toLocaleDateString("pt-BR")) return "hoje";
+  if (chaveD === ontem.toLocaleDateString("pt-BR")) return "ontem";
+  return d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "");
+}
+
+function agruparPorDia(apostasOrdenadas: Aposta[]): GrupoDia[] {
+  const grupos: GrupoDia[] = [];
+  for (const a of apostasOrdenadas) {
+    const chave = new Date(a.data).toLocaleDateString("pt-BR");
+    let g = grupos[grupos.length - 1];
+    if (!g || g.chave !== chave) {
+      g = { chave, rotulo: rotuloDia(a.data), apostas: [], apostado: 0, lucro: 0, pendentes: 0 };
+      grupos.push(g);
+    }
+    g.apostas.push(a);
+    g.apostado += a.valorApostado;
+    if (a.resultado === "pendente") {
+      g.pendentes += 1;
+    } else {
+      g.lucro += a.resultado === "ganhou" ? a.retorno - a.valorApostado : -a.valorApostado;
+    }
+  }
+  return grupos;
+}
+
 interface Props {
   refDate: Date;
   mudarMes: (delta: number) => void;
@@ -82,6 +122,7 @@ export function Apostas({
   }
 
   const lista = [...apostasDoMes].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+  const grupos = agruparPorDia(lista);
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
@@ -158,13 +199,48 @@ export function Apostas({
           <p style={{ color: "var(--ink-soft)", fontSize: 14, fontStyle: "italic" }}>nenhuma aposta registrada esse mês.</p>
         ) : (
           <AnimatePresence initial={false}>
-          {lista.map((a, i) => {
-            const lucro = a.resultado === "ganhou" ? a.retorno - a.valorApostado : a.resultado === "perdeu" ? -a.valorApostado : 0;
-            const corStatus =
-              a.resultado === "ganhou" ? "var(--verde)" : a.resultado === "perdeu" ? "var(--rust)" : "var(--ink-soft)";
-            const rotuloStatus = a.resultado === "ganhou" ? "ganhou" : a.resultado === "perdeu" ? "perdeu" : "pendente";
-            const rotulo = `${a.descricao}, ${formatarMoeda(a.valorApostado)}, ${new Date(a.data).toLocaleDateString("pt-BR")}`;
-            return (
+          {(() => {
+            let indice = 0;
+            return grupos.flatMap((g, gi) => {
+              const cabecalho = (
+                <div
+                  key={`cab-${g.chave}`}
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    gap: 10,
+                    marginTop: gi === 0 ? 0 : 22,
+                    marginBottom: 6,
+                    paddingBottom: 5,
+                    borderBottom: "1px solid var(--border)",
+                  }}
+                >
+                  <span style={{ fontSize: 12.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-soft)" }}>
+                    {g.rotulo}
+                  </span>
+                  <span style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+                    <span className="cf-num" style={{ fontSize: 12, color: "var(--ink-soft)" }}>
+                      {formatarMoeda(g.apostado)} apostado{g.pendentes > 0 ? ` · ${g.pendentes} pendente(s)` : ""}
+                    </span>
+                    <span
+                      className="cf-num"
+                      style={{ fontSize: 14, fontWeight: 700, color: g.lucro >= 0 ? "var(--verde)" : "var(--rust)" }}
+                    >
+                      {g.lucro >= 0 ? "+" : ""}{formatarMoeda(g.lucro)}
+                    </span>
+                  </span>
+                </div>
+              );
+
+              const linhas = g.apostas.map((a) => {
+                const i = indice++;
+                const lucro = a.resultado === "ganhou" ? a.retorno - a.valorApostado : a.resultado === "perdeu" ? -a.valorApostado : 0;
+                const corStatus =
+                  a.resultado === "ganhou" ? "var(--verde)" : a.resultado === "perdeu" ? "var(--rust)" : "var(--ink-soft)";
+                const rotuloStatus = a.resultado === "ganhou" ? "ganhou" : a.resultado === "perdeu" ? "perdeu" : "pendente";
+                const rotulo = `${a.descricao}, ${formatarMoeda(a.valorApostado)}, ${new Date(a.data).toLocaleDateString("pt-BR")}`;
+                return (
               <motion.div
                 key={a.id}
                 layout
@@ -270,8 +346,12 @@ export function Apostas({
                   );
                 })()}
               </motion.div>
-            );
-          })}
+                );
+              });
+
+              return [cabecalho, ...linhas];
+            });
+          })()}
           </AnimatePresence>
         )}
       </section>
