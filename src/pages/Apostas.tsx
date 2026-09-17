@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Aposta, ResumoApostas } from "../types";
 import { formatarMoeda, formatarPct, parseMoeda } from "../utils/format";
 import { SeletorMes } from "../components/SeletorMes";
-import { IconeX } from "../components/Icones";
+import { IconeX, IconeSeta } from "../components/Icones";
 import { NumeroAnimado } from "../components/NumeroAnimado";
 import {
   rotuloCampo, campoInput, cartaoEstilo, botaoPrimario, botaoSecundario, botaoGhost, linkDiscreto, badgeEstilo,
@@ -71,6 +71,16 @@ export function Apostas({
   const [resolvendoGanhoId, setResolvendoGanhoId] = useState<string | null>(null);
   const [retornoInput, setRetornoInput] = useState("");
   const [oddInput, setOddInput] = useState("");
+  const [diasColapsados, setDiasColapsados] = useState<Set<string>>(new Set());
+
+  function alternarDia(chave: string) {
+    setDiasColapsados((prev) => {
+      const next = new Set(prev);
+      if (next.has(chave)) next.delete(chave);
+      else next.add(chave);
+      return next;
+    });
+  }
 
   function submeter(e: React.FormEvent) {
     e.preventDefault();
@@ -202,36 +212,63 @@ export function Apostas({
           {(() => {
             let indice = 0;
             return grupos.flatMap((g, gi) => {
+              const colapsado = diasColapsados.has(g.chave);
               const cabecalho = (
-                <div
+                <button
                   key={`cab-${g.chave}`}
+                  type="button"
+                  onClick={() => alternarDia(g.chave)}
+                  aria-expanded={!colapsado}
+                  className="cf-focus"
                   style={{
                     display: "flex",
                     alignItems: "baseline",
                     justifyContent: "space-between",
                     gap: 10,
+                    width: "100%",
                     marginTop: gi === 0 ? 0 : 22,
                     marginBottom: 6,
+                    padding: 0,
                     paddingBottom: 5,
+                    borderTop: "none",
+                    borderLeft: "none",
+                    borderRight: "none",
                     borderBottom: "1px solid var(--border)",
+                    background: "none",
+                    cursor: "pointer",
+                    textAlign: "left",
                   }}
                 >
-                  <span style={{ fontSize: 12.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-soft)" }}>
-                    {g.rotulo}
+                  <span style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        color: "var(--text-muted)",
+                        transform: colapsado ? "none" : "rotate(90deg)",
+                        transition: "transform 0.18s ease",
+                      }}
+                    >
+                      <IconeSeta dir="right" />
+                    </span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--text-muted)" }}>
+                      {g.rotulo}
+                    </span>
                   </span>
                   <span style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-                    <span className="cf-num" style={{ fontSize: 12, color: "var(--ink-soft)" }}>
+                    <span className="cf-num" style={{ fontSize: 12, color: "var(--text-muted)" }}>
                       {formatarMoeda(g.apostado)} apostado{g.pendentes > 0 ? ` · ${g.pendentes} pendente(s)` : ""}
                     </span>
                     <span
                       className="cf-num"
-                      style={{ fontSize: 14, fontWeight: 700, color: g.lucro >= 0 ? "var(--verde)" : "var(--rust)" }}
+                      style={{ fontSize: 13.5, fontWeight: 600, color: g.lucro >= 0 ? "var(--verde)" : "var(--rust)", opacity: 0.72 }}
                     >
                       {g.lucro >= 0 ? "+" : ""}{formatarMoeda(g.lucro)}
                     </span>
                   </span>
-                </div>
+                </button>
               );
+
+              if (colapsado) return [cabecalho];
 
               const linhas = g.apostas.map((a) => {
                 const i = indice++;
