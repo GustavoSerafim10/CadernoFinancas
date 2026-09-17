@@ -71,10 +71,10 @@ export function Apostas({
   const [resolvendoGanhoId, setResolvendoGanhoId] = useState<string | null>(null);
   const [retornoInput, setRetornoInput] = useState("");
   const [oddInput, setOddInput] = useState("");
-  const [diasColapsados, setDiasColapsados] = useState<Set<string>>(new Set());
+  const [diasExpandidos, setDiasExpandidos] = useState<Set<string>>(new Set());
 
   function alternarDia(chave: string) {
-    setDiasColapsados((prev) => {
+    setDiasExpandidos((prev) => {
       const next = new Set(prev);
       if (next.has(chave)) next.delete(chave);
       else next.add(chave);
@@ -212,7 +212,7 @@ export function Apostas({
           {(() => {
             let indice = 0;
             return grupos.flatMap((g, gi) => {
-              const colapsado = diasColapsados.has(g.chave);
+              const colapsado = !diasExpandidos.has(g.chave);
               const cabecalho = (
                 <button
                   key={`cab-${g.chave}`}
@@ -226,15 +226,14 @@ export function Apostas({
                     justifyContent: "space-between",
                     gap: 10,
                     width: "100%",
-                    marginTop: gi === 0 ? 0 : 22,
-                    marginBottom: 6,
-                    padding: 0,
-                    paddingBottom: 5,
-                    borderTop: "none",
-                    borderLeft: "none",
-                    borderRight: "none",
-                    borderBottom: "1px solid var(--border)",
-                    background: "none",
+                    marginTop: gi === 0 ? 0 : 10,
+                    marginBottom: 8,
+                    padding: "8px 12px",
+                    borderRadius: 10,
+                    border: "1px solid var(--border-strong)",
+                    background: "rgba(6, 6, 12, 0.55)",
+                    backdropFilter: "blur(6px)",
+                    WebkitBackdropFilter: "blur(6px)",
                     cursor: "pointer",
                     textAlign: "left",
                   }}
@@ -243,24 +242,24 @@ export function Apostas({
                     <span
                       style={{
                         display: "inline-flex",
-                        color: "var(--text-muted)",
+                        color: "var(--ink-soft)",
                         transform: colapsado ? "none" : "rotate(90deg)",
                         transition: "transform 0.18s ease",
                       }}
                     >
                       <IconeSeta dir="right" />
                     </span>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--text-muted)" }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink)" }}>
                       {g.rotulo}
                     </span>
                   </span>
                   <span style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-                    <span className="cf-num" style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                    <span className="cf-num" style={{ fontSize: 12, color: "var(--ink-soft)" }}>
                       {formatarMoeda(g.apostado)} apostado{g.pendentes > 0 ? ` · ${g.pendentes} pendente(s)` : ""}
                     </span>
                     <span
                       className="cf-num"
-                      style={{ fontSize: 13.5, fontWeight: 600, color: g.lucro >= 0 ? "var(--verde)" : "var(--rust)", opacity: 0.72 }}
+                      style={{ fontSize: 13.5, fontWeight: 700, color: g.lucro >= 0 ? "var(--verde)" : "var(--rust)" }}
                     >
                       {g.lucro >= 0 ? "+" : ""}{formatarMoeda(g.lucro)}
                     </span>
