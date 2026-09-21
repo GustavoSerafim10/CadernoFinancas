@@ -39,6 +39,7 @@ export function Extrato({
   const [tornarRecorrente, setTornarRecorrente] = useState(false);
   const [filtroTipo, setFiltroTipo] = useState<TipoTransacao | "todos">("todos");
   const [filtroConta, setFiltroConta] = useState("todas");
+  const [filtroCategoria, setFiltroCategoria] = useState("todas");
 
   const [novaContaNome, setNovaContaNome] = useState("");
   const [mostrarGestao, setMostrarGestao] = useState(false);
@@ -121,9 +122,13 @@ export function Extrato({
     }
   }
 
+  const mostrarFiltroCategoria = filtroTipo === "todos" || filtroTipo === "gasto";
+  const filtroCategoriaEfetivo = mostrarFiltroCategoria ? filtroCategoria : "todas";
+
   const listaFiltrada = transacoesDoMes
     .filter((t) => filtroTipo === "todos" || t.tipo === filtroTipo)
     .filter((t) => filtroContaEfetivo === "todas" || t.contaId === filtroContaEfetivo)
+    .filter((t) => filtroCategoriaEfetivo === "todas" || t.categoria === filtroCategoriaEfetivo)
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 
   return (
@@ -261,10 +266,18 @@ export function Extrato({
             <option value="todas">todas as contas</option>
             {contas.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
+          {mostrarFiltroCategoria && (
+            <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="cf-focus" aria-label="Filtrar por categoria" style={{ ...campoInput, maxWidth: 200 }}>
+              <option value="todas">todas as categorias</option>
+              {CATEGORIAS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+            </select>
+          )}
         </div>
 
         {listaFiltrada.length === 0 ? (
-          <p style={{ color: "var(--ink-soft)", fontSize: 14, fontStyle: "italic" }}>nada por aqui ainda esse mês.</p>
+          <p style={{ color: "var(--ink-soft)", fontSize: 14, fontStyle: "italic" }}>
+            {transacoesDoMes.length > 0 ? "nenhum lançamento com esses filtros." : "nada por aqui ainda esse mês."}
+          </p>
         ) : (
           <AnimatePresence initial={false}>
             {listaFiltrada.map((t, i) => {
