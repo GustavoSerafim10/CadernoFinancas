@@ -5,6 +5,7 @@ import { CATEGORIAS, catLabel, catCor } from "../constants";
 import { formatarMoeda, parseMoeda } from "../utils/format";
 import { SeletorMes } from "../components/SeletorMes";
 import { IconeX, IconeEditar } from "../components/Icones";
+import { SeletorLista } from "../components/SeletorLista";
 import { rotuloCampo, campoInput, botaoPrimario, botaoSecundario, botaoGhost, linkDiscreto } from "../components/estilosComuns";
 
 interface Props {
@@ -256,21 +257,33 @@ export function Extrato({
 
       <section>
         <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
-          <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value as TipoTransacao | "todos")} className="cf-focus" aria-label="Filtrar por tipo" style={{ ...campoInput, maxWidth: 150 }}>
-            <option value="todos">todos os tipos</option>
-            <option value="receita">receitas</option>
-            <option value="gasto">gastos</option>
-            <option value="investimento">investimentos</option>
-          </select>
-          <select value={filtroContaEfetivo} onChange={(e) => setFiltroConta(e.target.value)} className="cf-focus" aria-label="Filtrar por conta" style={{ ...campoInput, maxWidth: 180 }}>
-            <option value="todas">todas as contas</option>
-            {contas.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
-          </select>
+          <SeletorLista
+            value={filtroTipo}
+            onChange={(v) => setFiltroTipo(v as TipoTransacao | "todos")}
+            ariaLabel="Filtrar por tipo"
+            maxWidth={150}
+            opcoes={[
+              { value: "todos", label: "todos os tipos" },
+              { value: "receita", label: "receitas" },
+              { value: "gasto", label: "gastos" },
+              { value: "investimento", label: "investimentos" },
+            ]}
+          />
+          <SeletorLista
+            value={filtroContaEfetivo}
+            onChange={setFiltroConta}
+            ariaLabel="Filtrar por conta"
+            maxWidth={180}
+            opcoes={[{ value: "todas", label: "todas as contas" }, ...contas.map((c) => ({ value: c.id, label: c.nome }))]}
+          />
           {mostrarFiltroCategoria && (
-            <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="cf-focus" aria-label="Filtrar por categoria" style={{ ...campoInput, maxWidth: 200 }}>
-              <option value="todas">todas as categorias</option>
-              {CATEGORIAS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-            </select>
+            <SeletorLista
+              value={filtroCategoria}
+              onChange={setFiltroCategoria}
+              ariaLabel="Filtrar por categoria"
+              maxWidth={200}
+              opcoes={[{ value: "todas", label: "todas as categorias" }, ...CATEGORIAS.map((c) => ({ value: c.id, label: c.label }))]}
+            />
           )}
         </div>
 
