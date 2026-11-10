@@ -8,6 +8,7 @@ import { CosmicBackground } from "./components/CosmicBackground";
 import { FinanceHud } from "./components/FinanceHud";
 import { useFinancas } from "./hooks/useFinancas";
 import { setItem } from "./services/storage";
+import { gerarDadosDemo } from "./data/demo";
 import { chaveDoMes } from "./utils/date";
 import { PaginaId } from "./constants";
 import { Extrato } from "./pages/Extrato";
@@ -120,6 +121,25 @@ export default function App() {
     window.location.reload();
   }
 
+  async function carregarDemo() {
+    setErroImportacao(null);
+    const temOutrosDados =
+      financas.investimentos.length > 0 || financas.recorrencias.length > 0 || Object.keys(financas.metas).length > 0;
+    if (temOutrosDados && !window.confirm("Os dados de demonstração vão substituir os dados salvos neste navegador. Continuar?")) return;
+    const dados = gerarDadosDemo();
+    try {
+      for (const chave of Object.keys(dados) as (keyof typeof dados)[]) {
+        await setItem(chave, dados[chave]);
+      }
+    } catch {
+      setErroImportacao("Não consegui salvar os dados de demonstração neste navegador (o armazenamento pode estar cheio ou em modo privado).");
+      return;
+    }
+    window.location.reload();
+  }
+
+  const semLancamentos = !financas.carregando && financas.transacoes.length === 0;
+
   return (
     <div className="app-shell">
       <div className="cosmic-foto" />
@@ -182,7 +202,7 @@ export default function App() {
         {financas.erro && <div className="erro">{financas.erro}</div>}
         {erroImportacao && <div className="erro">{erroImportacao}</div>}
 
-        {financas.primeiroAcesso && !avisoOrigemDispensado && (
+        {(financas.primeiroAcesso || semLancamentos) && !avisoOrigemDispensado && (
           <div
             style={{
               ...cartaoEstilo,
@@ -197,10 +217,12 @@ export default function App() {
           >
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--rust)", flex: "0 0 auto" }} />
             <span style={{ flex: 1 }}>
-              Não encontramos nenhum dado salvo neste endereço. Se você já usou o app antes, confira se está no mesmo
-              navegador e na mesma URL de sempre (<span className="cf-num">http://localhost:5173</span>) — o
-              histórico fica salvo só ali, não sincroniza entre navegadores nem portas diferentes.
+              Nenhum lançamento salvo neste navegador ainda. Os dados ficam só neste navegador (não vão para nenhum servidor).
+              Quer ver o app funcionando? Carregue um exemplo com dados fictícios.
             </span>
+            <button onClick={carregarDemo} className="cf-focus" style={{ ...botaoSecundario, flex: "0 0 auto" }}>
+              Carregar dados de demonstração
+            </button>
             <button
               onClick={() => setAvisoOrigemDispensado(true)}
               className="cf-focus"
