@@ -62,6 +62,8 @@ GitHub Actions do próprio repositório.
 > se `5173` já estiver em uso — sinal pra fechar o processo que já está
 > rodando ali antes de continuar.
 
+Na primeira visita, o app mostra o botão **Carregar dados de demonstração**, que preenche o painel com dados fictícios (gerados em `src/data/demo.ts`) para quem quiser ver o app funcionando.
+
 ## Estrutura de pastas
 
 ```
